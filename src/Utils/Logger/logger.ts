@@ -3,7 +3,6 @@ import winston, { format} from 'winston';
 import { statusCodes, logLevels } from "../../DataTypes/StatusCode/index.js";
 import { ErrorObject, HTTPMethod, StatusCodeType } from "../../DataTypes/types/IUserType.js";
 import path from 'path';
-import { v4 as uuidv4 } from 'uuid';
 import DailyRotateFile from 'winston-daily-rotate-file';
 
 const { combine, timestamp, printf } = format;

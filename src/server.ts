@@ -2,10 +2,9 @@ import express, { Express } from 'express';
 import cors from 'cors';
 import router from './Routes/index.js';
 import { loggerMiddleware } from './Utils/Logger/logger.js';
-import { isDatabaseHealthy } from './Utils/db/client';
+import { isDatabaseHealthy } from './Utils/db/client.js';
 import bodyParser from 'body-parser';
-import { setupSwagger } from './Utils/swagger';
-import { setupWebSocketServer } from './Utils/scripts/ws';
+import { setupSwagger } from './Utils/swagger.js';
 
 const app: Express = express();
 
@@ -21,7 +20,7 @@ app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
 // Log incoming request body size
-app.use((req, res, next) => {
+app.use((req, _res, next) => {
   console.log(`Incoming request body size: ${JSON.stringify(req.body).length} bytes`);
   next();
 });
@@ -45,4 +44,4 @@ const server = app.listen(PORT, function(){
 });
 
 // Initialize WebSocket server
-setupWebSocketServer(server);
+// setupWebSocketServer(server);
