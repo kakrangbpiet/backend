@@ -15,3 +15,28 @@ model superAdmin {
   category       String     @unique(map: "category_1")
   permissions    String[]
 }
+
+model samsarauser {
+  id                     String                 @id @default(auto()) @map("_id") @db.ObjectId
+  accountStatus          String
+  address                String
+  category               String
+  createdAt              DateTime               @default(now()) @map("createdAt")
+  email                  String                 @unique(map: "email_1")
+  name                   String
+  phoneNumber            String                 @unique(map: "phoneNumber_1")
+  updatedAt              DateTime               @updatedAt @map("updatedAt")
+  permissions            String[]
+  roleId                 String?
+  razorpayPayments       String[]               @default([])
+  cartItems              Json[]
+  v                      Int?                   @ignore
+}
+
+model unverifiedsamsarauser {
+  id                     String                 @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt              DateTime               @default(now()) @map("createdAt")
+  phoneNumber            String                 @unique(map: "phoneNumber_1")
+  updatedAt              DateTime               @updatedAt @map("updatedAt")
+  v                      Int?                   @ignore
+}
