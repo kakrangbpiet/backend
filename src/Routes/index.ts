@@ -4,6 +4,7 @@ import { Request, Response, NextFunction } from "express";
 import { DbError } from "../DataTypes/enums/Error.js";
 import { isDatabaseHealthy } from "../Utils/db/client.js";
 import AuthRoutes from "./Authentication/AuthRoutes.js"
+import SuperAdmin from "./SystemAdmin/SystemAdminRoutes.js"
 import TravelRoutes from "./Travel/TravelRoutes.js";
 const router = express.Router({ mergeParams: true });
 
@@ -42,6 +43,12 @@ router.use(
   "/V1",
   CheckDatabaseConnection,
   TravelRoutes
+);
+//SuperAdmin routes
+router.use(
+  "/V1",
+  CheckDatabaseConnection,
+  SuperAdmin
 );
 
 router.use(handleError)
