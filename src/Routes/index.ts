@@ -1,7 +1,7 @@
 import express from "express";
 import handleError from "../Middleware/handleError.js";
 import { Request, Response, NextFunction } from "express";
-import { MongooseError } from "../DataTypes/enums/Error.js";
+import { DbError } from "../DataTypes/enums/Error.js";
 import { isDatabaseHealthy } from "../Utils/db/client.js";
 
 const router = express.Router({ mergeParams: true });
@@ -16,7 +16,7 @@ const CheckDatabaseConnection = async (
     const isDatabseHealthy = await isDatabaseHealthy()
     if (isDatabseHealthy == false) {
       // Prisma is not connected
-      throw MongooseError.DatabaseConnectionError();
+      throw DbError.DatabaseConnectionError();
     }
     next();
   } catch (error) {
