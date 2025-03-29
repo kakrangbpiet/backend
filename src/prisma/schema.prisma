@@ -40,3 +40,24 @@ model unverifiedsamsarauser {
   updatedAt              DateTime               @updatedAt @map("updatedAt")
   v                      Int?                   @ignore
 }
+
+model TravelItem {
+  id          String                 @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String
+  type        String   // e.g., "vacation", "business", "adventure"
+  category    String   // e.g., "beach", "mountain", "city"
+  price       Float?
+  location    String?
+  country     String?
+  city        String?
+  rating      Float?   @default(0)
+  reviewCount Int?     @default(0)
+  imageUrl    String?
+  isFeatured  Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  v                      Int?                   @ignore
+  
+}
