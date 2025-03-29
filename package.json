@@ -1,5 +1,5 @@
 {
-  "name": "veramo-agent",
+  "name": "samsara-adventures",
   "version": "1.0.0",
   "main": "server.js",
   "license": "MIT",
@@ -9,9 +9,9 @@
     "prod": "export NODE_ENV=production && node --no-warnings=ExperimentalWarning --loader ts-node/esm src/server.ts",
     "start": "export NODE_ENV=production && prisma generate && node dist/server.js",
     "stage": "export NODE_ENV=production && prisma generate && node dist/server.js",
-    "docker:build": "sudo docker build -t vc-c3i .",
-    "docker:start": "sudo docker run -p 8003:8001 vc-c3i",
-    "build": "npm install --force && cd src/Projects/Blockchain/hardhat && npm install --force && npx hardhat compile && cd .. && cd .. && cd .. && cd .. && prisma generate && npx tsc && copyfiles -u 1 'src/Projects/bots/beep.mp3' 'src/Projects/Blockchain/hardhat/MetakulContracts/**/*.json' dist/",
+    "docker:build": "sudo docker build -t samsara .",
+    "docker:start": "sudo docker run -p 8003:8001 samsara",
+    "build": "npm install && prisma generate && npx tsc",
     "heroku:deploy": "npm install && prisma generate"
   },
   "prisma": {
