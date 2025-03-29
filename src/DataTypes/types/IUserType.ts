@@ -1,5 +1,9 @@
 
+import { accountStatus,  UserCategory } from "../enums/IUserEnums";
 
+export type AccountStatusType = accountStatus;
+
+export type CategoryType =UserCategory
 
 export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
