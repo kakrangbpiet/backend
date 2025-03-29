@@ -1,0 +1,42 @@
+{
+    "name": "veramo-agent",
+    "version": "1.0.0",
+    "main": "server.js",
+    "license": "MIT",
+    "type": "module",
+    "scripts": {
+      "dev": "export NODE_ENV=development && node --no-warnings=ExperimentalWarning --loader ts-node/esm src/server.ts",
+      "prod": "export NODE_ENV=production && node --no-warnings=ExperimentalWarning --loader ts-node/esm src/server.ts",
+      "start": "export NODE_ENV=production && prisma generate && node dist/server.js",
+      "stage": "export NODE_ENV=production && prisma generate && node dist/server.js",
+      "docker:build": "sudo docker build -t vc-c3i .",
+      "docker:start": "sudo docker run -p 8003:8001 vc-c3i",
+      "build": "npm install --force && cd src/Projects/Blockchain/hardhat && npm install --force && npx hardhat compile && cd .. && cd .. && cd .. && cd .. && prisma generate && npx tsc && copyfiles -u 1 'src/Projects/bots/beep.mp3' 'src/Projects/Blockchain/hardhat/MetakulContracts/**/*.json' dist/",
+      "heroku:deploy": "npm install && prisma generate"
+    },
+    "prisma": {
+      "schema": "./src/prisma/schema.prisma"
+    },
+    "devDependencies": {
+      "@types/cors": "^2.8.15",
+      "@types/express": "^4.17.21",
+      "@types/uuid": "^9.0.8",
+      "eslint": "^8.56.0",
+      "prisma": "^5.20.0",
+      "typescript": "^5.6.3",
+      "typescript-eslint": "^7.10.0"
+    },
+    "dependencies": {
+      "@prisma/client": "^5.20.0",
+      "@types/node": "^22.7.5",
+      "cors": "^2.8.5",
+      "dotenv": "^16.4.5",
+      "express": "^4.21.1",
+      "swagger-jsdoc": "^6.2.8",
+      "swagger-ui-express": "^5.0.1",
+      "ts-node": "^10.9.1",
+      "winston": "^3.13.0",
+      "winston-daily-rotate-file": "^5.0.0",
+      "zod": "^3.23.8"
+    }
+  }
