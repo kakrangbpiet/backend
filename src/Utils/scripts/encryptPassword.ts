@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { logWithMessageAndStep } from "../Logger/logger";
+import { logWithMessageAndStep } from "../Logger/logger.js";
 
 const saltRounds = 10;
 
