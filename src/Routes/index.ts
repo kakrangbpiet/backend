@@ -3,7 +3,7 @@ import handleError from "../Middleware/handleError.js";
 import { Request, Response, NextFunction } from "express";
 import { DbError } from "../DataTypes/enums/Error.js";
 import { isDatabaseHealthy } from "../Utils/db/client.js";
-
+import AuthRoutes from "./Authentication/AuthRoutes.js"
 const router = express.Router({ mergeParams: true });
 
 // Middleware to check Mongoose connection
@@ -28,6 +28,13 @@ const CheckDatabaseConnection = async (
 router.get("/health", CheckDatabaseConnection, async (_req: Request, res: Response) => {
     res.status(200).json({ message: "Database is healthy", status: "OK" });
   });
+
+  //system Admin Routes
+router.use(
+  "/V1",
+  CheckDatabaseConnection,
+  AuthRoutes
+);
 
 router.use(handleError)
 
