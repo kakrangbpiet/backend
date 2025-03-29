@@ -5,6 +5,7 @@ import { loggerMiddleware } from './Utils/Logger/logger.js';
 import { isDatabaseHealthy } from './Utils/db/client.js';
 import bodyParser from 'body-parser';
 import { setupSwagger } from './Utils/swagger.js';
+import { setupWebSocketServer } from './Utils/scripts/ws.js';
 
 const app: Express = express();
 
@@ -44,4 +45,4 @@ const server = app.listen(PORT, function(){
 });
 
 // Initialize WebSocket server
-// setupWebSocketServer(server);
+setupWebSocketServer(server);
