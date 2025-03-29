@@ -29,5 +29,10 @@ export const ErrorEnum = {
         message: `Invalid JWT SECRET`,
         details: ""
     }),
+    SignUpValidationError: (data: unknown): ErrorObject => ({
+        statusCode: 400,
+        message: `Not Availabale '${data}'`,
+        details: ""
+    }),
   
 };
