@@ -39,5 +39,16 @@
     "winston-daily-rotate-file": "^5.0.0",
     "ws": "^8.18.1",
     "zod": "^3.23.8"
-  }
+  },
+  "description": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kakrangbpiet/backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "bugs": {
+    "url": "https://github.com/kakrangbpiet/backend/issues"
+  },
+  "homepage": "https://github.com/kakrangbpiet/backend#readme"
 }
