@@ -61,9 +61,6 @@ router.post("/passwordless/registerUser", PasswordLessLogin.registerUser);
  *               phoneNumber:
  *                 type: string
  *                 example: "1234567890"
- *               email:
- *                 type: string
- *                 example: "user@example.com"
  *               password:
  *                 type: string
  *                 example: "password123"
