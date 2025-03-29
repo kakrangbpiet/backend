@@ -1,6 +1,6 @@
 import { ErrorObject } from "../types/IUserType";
 
-export const MongooseError = {
+export const DbError = {
     ErrorOfMongoose: (): ErrorObject => ({
         statusCode: 400,
         message: "Check Form Data",
@@ -17,3 +17,17 @@ export const MongooseError = {
         details: ""
     }),
 }
+
+export const ErrorEnum = {
+    InvalidJwt: (err: unknown): ErrorObject => ({
+        statusCode: 400,
+        message: `Invalid User JWT`,
+        details: err
+    }),
+    InvalidJwtSecret: (): ErrorObject => ({
+        statusCode: 400,
+        message: `Invalid JWT SECRET`,
+        details: ""
+    }),
+  
+};
