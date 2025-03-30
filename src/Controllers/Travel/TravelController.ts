@@ -363,8 +363,9 @@ export const getTravelPackagesByStatus = async (
     next(error);
   }
 };
+
 /**
- * Get travel packages by category
+ * Get travel packages by category and status
  */
 export const getTravelItemsByCategory = async (
   req: Request,
@@ -372,15 +373,15 @@ export const getTravelItemsByCategory = async (
   next: NextFunction
 ) => {
   const childLogger = (req as any).childLogger as winston.Logger;
-  const { category } = req.query;
+  const { category, status } = req.query;
 
   try {
     logWithMessageAndStep(
       childLogger,
       "Step 1",
-      "Fetching travel packages by category",
+      "Fetching travel packages by category and status",
       "getTravelItemsByCategory",
-      `Category: ${category}`,
+      `Category: ${category}, Status: ${status}`,
       "info"
     );
 
@@ -390,11 +391,15 @@ export const getTravelItemsByCategory = async (
       });
     }
 
+    const filters: any = { category: String(category) };
+    if (status) {
+      filters.status = String(status);
+    } else {
+      filters.status = "active"; // Default to active status
+    }
+
     const packages = await prisma.travelPackage.findMany({
-      where: {
-        category: String(category),
-        status: "active" // Only return active packages by default
-      },
+      where: filters,
       orderBy: {
         createdAt: "desc"
       }
@@ -403,21 +408,21 @@ export const getTravelItemsByCategory = async (
     logWithMessageAndStep(
       childLogger,
       "Step 2",
-      "Successfully fetched travel packages by category",
+      "Successfully fetched travel packages by category and status",
       "getTravelItemsByCategory",
-      `Found ${packages.length} packages in category ${category}`,
+      `Found ${packages.length} packages in category ${category} with status ${status || 'active'}`,
       "info"
     );
 
     res.status(200).json({
       data: packages,
-      message: `Travel packages in category ${category} fetched successfully`
+      message: `Travel packages in category ${category} with status ${status || 'active'} fetched successfully`
     });
   } catch (error) {
     logWithMessageAndStep(
       childLogger,
       "Error Step",
-      "Error fetching travel packages by category",
+      "Error fetching travel packages by category and status",
       "getTravelItemsByCategory",
       JSON.stringify(error),
       "error"
@@ -425,6 +430,7 @@ export const getTravelItemsByCategory = async (
     next(error);
   }
 };
+
 
 /**
  * Update travel package status
