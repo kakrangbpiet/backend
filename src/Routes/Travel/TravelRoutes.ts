@@ -21,7 +21,7 @@ const router = express.Router({ mergeParams: true });
 
 /**
  * @swagger
- * /backendApi/Travel/travelType:
+ * /Travel/travelType:
  *   get:
  *     summary: Get all travel packages
  *     tags: [Travel]
@@ -47,7 +47,7 @@ router.get("/Travel/travelType", getAllTravelPackages);
 
 /**
  * @swagger
- * /backendApi/Travel/travelCategory:
+ * /Travel/travelCategory:
  *   get:
  *     summary: Get travel packages by category
  *     tags: [Travel]
@@ -81,7 +81,7 @@ router.get("/Travel/travelType", getAllTravelPackages);
 router.get("/Travel/travelCategory", getTravelItemsByCategory);
 /**
  * @swagger
- * /backendApi/Travel/status:
+ * /Travel/status:
  *   get:
  *     summary: Get travel packages by status
  *     tags: [Travel]
@@ -116,7 +116,7 @@ router.get("/Travel/status", getTravelPackagesByStatus);
 
 /**
  * @swagger
- * /backendApi/Travel:
+ * /Travel:
  *   get:
  *     summary: Get a specific travel package by ID
  *     tags: [Travel]
@@ -149,7 +149,7 @@ router.get("/Travel/:id", getTravelPackageById);
 
 /**
  * @swagger
- * /backendApi/Travel:
+ * /Travel:
  *   post:
  *     summary: Create a new travel package
  *     tags: [Travel]
@@ -185,7 +185,7 @@ router.post("/Travel", createTravelPackage);
 
 /**
  * @swagger
- * /backendApi/Travel:
+ * /Travel:
  *   patch:
  *     summary: Update a travel package
  *     tags: [Travel]
@@ -230,7 +230,7 @@ router.patch("/Travel/:id", updateTravelPackage);
 
 /**
  * @swagger
- * /backendApi/Travel/updateStatus:
+ * /Travel/updateStatus:
  *   patch:
  *     summary: Update travel package status
  *     tags: [Travel]
@@ -280,7 +280,7 @@ router.patch("/Travel/updateStatus/:id", updateTravelPackageStatus);
 
 /**
  * @swagger
- * /backendApi/Travel:
+ * /Travel:
  *   delete:
  *     summary: Delete a travel package
  *     tags: [Travel]
