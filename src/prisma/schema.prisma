@@ -41,23 +41,22 @@ model unverifiedsamsarauser {
   v                      Int?                   @ignore
 }
 
-model TravelItem {
-  id          String                 @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  description String
-  type        String   // e.g., "vacation", "business", "adventure"
-  category    String   // e.g., "beach", "mountain", "city"
-  price       Float?
-  location    String?
-  country     String?
-  city        String?
-  rating      Float?   @default(0)
-  reviewCount Int?     @default(0)
-  imageUrl    String?
-  isFeatured  Boolean  @default(false)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  v                      Int?                   @ignore
-  
+model TravelPackage {
+  id                     String                 @id @default(auto()) @map("_id") @db.ObjectId
+  title           String
+  description     String
+  price           Float
+  originalPrice   Float?
+  image           String
+  images          String[]
+  location        String
+  category        String
+  status          String     @default("active")
+  maxTravelers    Int?
+  availableSpots  Int?
+  travelType      String?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  @@map("travel_packages")
 }
