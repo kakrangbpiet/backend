@@ -2,8 +2,8 @@ import { Response, NextFunction, Request } from 'express';
 import { CommonError, ErrorEnum } from '../DataTypes/enums/Error.js';
 import winston from 'winston';
 import { IsystemAdmin, IUser } from '../DataTypes/Interfaces/IUser.js';
-import { prisma } from 'src/Utils/db/client.js';
-import { logWithMessageAndStep } from 'src/Utils/Logger/logger.js';
+import { prisma } from '../Utils/db/client.js';
+import { logWithMessageAndStep } from '../Utils/Logger/logger.js';
 
 {/*
   // Should be used only while login or when one user want to interact with other user

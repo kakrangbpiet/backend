@@ -6,6 +6,7 @@ import { isDatabaseHealthy } from "../Utils/db/client.js";
 import AuthRoutes from "./Authentication/AuthRoutes.js"
 import SuperAdmin from "./SystemAdmin/SystemAdminRoutes.js"
 import TravelRoutes from "./Travel/TravelRoutes.js";
+import LoginRoutes from "./Authentication/LoginRoutes.js";
 const router = express.Router({ mergeParams: true });
 
 // Middleware to check Mongoose connection
@@ -49,6 +50,13 @@ router.use(
   "/V1",
   CheckDatabaseConnection,
   SuperAdmin
+);
+
+//User routes
+router.use(
+  "/V1",
+  CheckDatabaseConnection,
+  LoginRoutes
 );
 
 router.use(handleError)

@@ -12,7 +12,7 @@ import { RequestWithIdentifier } from "../../Middleware/CheckIdentifier.js";
 import { otpPurpose } from "../../DataTypes/enums/IUserEnums.js";
 import { logWithMessageAndStep } from "../../Utils/Logger/logger.js";
 import { prisma } from "../../Utils/db/client.js";
-import { generateTokens, refreshAccessToken } from "src/Utils/scripts/jwtToken.js";
+import { generateTokens, refreshAccessToken } from "../../Utils/scripts/jwtToken.js";
 
 export const login = async (
     req: LoginUserRequest,

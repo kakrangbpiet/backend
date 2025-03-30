@@ -3,8 +3,8 @@ import { ErrorEnum } from '../DataTypes/enums/Error.js';
 import { UserCategory } from '../DataTypes/enums/IUserEnums.js';
 import { RequestWithUser } from './checkJwt.js';
 import winston, { child } from 'winston';
-import { logWithMessageAndStep } from 'src/Utils/Logger/logger.js';
-import { IUser } from 'src/DataTypes/Interfaces/IUser.js';
+import { logWithMessageAndStep } from '../Utils/Logger/logger.js';
+import { IUser } from '../DataTypes/Interfaces/IUser.js';
 
 
 export const checkUserCategoryExists = async (
