@@ -80,6 +80,11 @@ export const ErrorEnum = {
         message: `Wrong password received for '${email}' `,
         details: ""
     }),
+    InvalidAccountCategory: (userEmail: IUser["email"] | undefined): ErrorObject => ({
+        statusCode: 404,
+        message: `Invalid Account Category for user '${userEmail}'`,
+        details: ""
+    }),
 };
 
 
