@@ -14,5 +14,6 @@ export default {
     PORT: process.env.PORT || 5000,
     JWT_SECRET:process.env.JWT_SECRET,
     REFRESH_TOKEN_SECRET:process.env.REFRESH_TOKEN_SECRET,
-
+    OTP_API_URL:process.env.OTP_API_URL,
+    API_KEY_OTP_SERVER:process.env.API_KEY_OTP_SERVER,
 };
