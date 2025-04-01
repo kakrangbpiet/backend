@@ -60,3 +60,22 @@ model TravelPackage {
 
   @@map("travel_packages")
 }
+
+model TravelInquiry {
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  packageId        String
+  packageTitle     String
+  destination      String
+  passengerCount   Int
+  travelDates      String
+  specialRequests  String   @default("")
+  status          String   @default("pending")
+  userId          String?
+  name            String?
+  email           String?
+  phone           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("travel_inquiries")
+}
