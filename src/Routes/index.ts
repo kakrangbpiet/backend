@@ -7,6 +7,7 @@ import AuthRoutes from "./Authentication/AuthRoutes.js"
 import SuperAdmin from "./SystemAdmin/SystemAdminRoutes.js"
 import TravelRoutes from "./Travel/TravelRoutes.js";
 import LoginRoutes from "./Authentication/LoginRoutes.js";
+import TraverInquiryRoutes from "./Travel/TraverInquiryRoutes.js";
 const router = express.Router({ mergeParams: true });
 
 // Middleware to check Mongoose connection
@@ -57,6 +58,12 @@ router.use(
   "/V1",
   CheckDatabaseConnection,
   LoginRoutes
+);
+//Travel inquiries routes
+router.use(
+  "/V1",
+  CheckDatabaseConnection,
+  TraverInquiryRoutes
 );
 
 router.use(handleError)

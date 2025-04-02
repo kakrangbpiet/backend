@@ -246,6 +246,7 @@ export const verifyOtpLogin = async (
                     refreshToken,
                 },
                 email: user.email,
+                phoneNumber: user.phoneNumber,
                 category: user.category,
             },
         });
@@ -440,5 +441,92 @@ export const registerUser = async (
             "error"
         );
         return next(error);
+    }
+};
+
+/**
+ * Get all users (both verified and unverified)
+ */
+export const getAllUsers = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    const childLogger = (req as any).childLogger as winston.Logger;
+
+    if (!childLogger) {
+        return next(new Error("Internal Server Error"));
+    }
+
+    try {
+        logWithMessageAndStep(
+            childLogger,
+            "Step 1",
+            "Fetching all users",
+            "getAllUsers",
+            "",
+            "info"
+        );
+
+        // Get verified users
+        const verifiedUsers = await prisma.samsarauser.findMany({
+            select: {
+                id: true,
+                email: true,
+                name: true,
+                phoneNumber: true,
+                address: true,
+                category: true,
+                accountStatus: true,
+                createdAt: true,
+                updatedAt: true
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+
+        // Get unverified users
+        const unverifiedUsers = await prisma.unverifiedsamsarauser.findMany({
+            select: {
+                id: true,
+                phoneNumber: true,
+                createdAt: true,
+                updatedAt: true
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+
+        logWithMessageAndStep(
+            childLogger,
+            "Step 2",
+            "Successfully fetched all users",
+            "getAllUsers",
+            JSON.stringify({
+                verifiedCount: verifiedUsers.length,
+                unverifiedCount: unverifiedUsers.length
+            }),
+            "info"
+        );
+
+        res.status(200).json({
+            data: {
+                verifiedUsers,
+                unverifiedUsers
+            },
+            message: "Users fetched successfully"
+        });
+    } catch (error) {
+        logWithMessageAndStep(
+            childLogger,
+            "Error Step",
+            "Error while fetching users",
+            "getAllUsers",
+            JSON.stringify(error),
+            "error"
+        );
+        return next(DbError.ErrorOfMongoose());
     }
 };

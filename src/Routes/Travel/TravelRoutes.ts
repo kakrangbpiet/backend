@@ -9,6 +9,8 @@ import {
   getTravelItemsByCategory,
   updateTravelPackageStatus
 } from "../../Controllers/Travel/TravelController.js";
+import checkJwt from "../../Middleware/checkJwt.js";
+import { UserCategory } from "../../DataTypes/enums/IUserEnums.js";
 
 const router = express.Router({ mergeParams: true });
 
@@ -43,7 +45,9 @@ const router = express.Router({ mergeParams: true });
  *       500:
  *         description: Internal server error
  */
-router.get("/Travel/travelType", getAllTravelPackages);
+router.get("/Travel/travelType",
+      getAllTravelPackages
+    );
 
 /**
  * @swagger
@@ -78,7 +82,8 @@ router.get("/Travel/travelType", getAllTravelPackages);
  *       500:
  *         description: Internal server error
  */
-router.get("/Travel/travelCategory", getTravelItemsByCategory);
+router.get("/Travel/travelCategory",
+   getTravelItemsByCategory);
 /**
  * @swagger
  * /Travel/status:
@@ -181,7 +186,9 @@ router.get("/Travel/:id", getTravelPackageById);
  *       500:
  *         description: Internal server error
  */
-router.post("/Travel", createTravelPackage);
+router.post("/Travel",
+  checkJwt([UserCategory.SUPER_ADMIN]),
+  createTravelPackage);
 
 /**
  * @swagger
@@ -226,7 +233,9 @@ router.post("/Travel", createTravelPackage);
  *       500:
  *         description: Internal server error
  */
-router.patch("/Travel/:id", updateTravelPackage);
+router.patch("/Travel/:id",
+  checkJwt([UserCategory.SUPER_ADMIN]),
+  updateTravelPackage);
 
 /**
  * @swagger
@@ -276,7 +285,9 @@ router.patch("/Travel/:id", updateTravelPackage);
  *       500:
  *         description: Internal server error
  */
-router.patch("/Travel/updateStatus/:id", updateTravelPackageStatus);
+router.patch("/Travel/updateStatus/:id",
+  checkJwt([UserCategory.SUPER_ADMIN]),
+  updateTravelPackageStatus);
 
 /**
  * @swagger
@@ -311,6 +322,8 @@ router.patch("/Travel/updateStatus/:id", updateTravelPackageStatus);
  *       500:
  *         description: Internal server error
  */
-router.delete("/Travel/:id", deleteTravelPackage);
+router.delete("/Travel/:id",
+  checkJwt([UserCategory.SUPER_ADMIN]),
+  deleteTravelPackage);
 
 export default router;

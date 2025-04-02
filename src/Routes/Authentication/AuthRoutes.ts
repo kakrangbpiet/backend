@@ -1,5 +1,7 @@
 import express from "express";
 import * as PasswordLessLogin from "../../Controllers/Post/PasswordLessLogin.js";
+import checkJwt from "../../Middleware/checkJwt.js";
+import { UserCategory } from "../../DataTypes/enums/IUserEnums.js";
 
 const router = express.Router({ mergeParams: true });
 
@@ -113,4 +115,80 @@ router.post("/passwordless/login", PasswordLessLogin.loginWithOtp);
 router.post("/passwordless/verifyOtp", PasswordLessLogin.verifyOtpLogin);
 
 
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Get all users (verified and unverified)
+ *     tags:
+ *       - Users
+ *     responses:
+ *       200:
+ *         description: Returns all users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     verifiedUsers:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/VerifiedUser'
+ *                     unverifiedUsers:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/UnverifiedUser'
+ *                 message:
+ *                   type: string
+ *                   example: "Users fetched successfully"
+ *       500:
+ *         description: Internal server error
+ * 
+ * components:
+ *   schemas:
+ *     VerifiedUser:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         email:
+ *           type: string
+ *         name:
+ *           type: string
+ *         phoneNumber:
+ *           type: string
+ *         address:
+ *           type: string
+ *         category:
+ *           type: string
+ *         accountStatus:
+ *           type: string
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *     UnverifiedUser:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *         phoneNumber:
+ *           type: string
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ */
+router.get("/getAllUsers",
+      checkJwt([UserCategory.SUPER_ADMIN]),
+     PasswordLessLogin.getAllUsers);
+
 export default router;
+
