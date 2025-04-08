@@ -16,4 +16,5 @@ export default {
     REFRESH_TOKEN_SECRET:process.env.REFRESH_TOKEN_SECRET,
     OTP_API_URL:process.env.OTP_API_URL,
     API_KEY_OTP_SERVER:process.env.API_KEY_OTP_SERVER,
+    openAiApiKey:process.env.OPEN_API_KEY,
 };

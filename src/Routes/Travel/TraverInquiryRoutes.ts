@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createTravelInquiry, getUserInquiries, getInquiryDetails, updateInquiryStatus } from "../../Controllers/Travel/Inquiry/TravelInquiry.js";
+import { createTravelInquiry, getUserInquiries, getInquiryDetails, updateInquiryStatus, GetPrompt } from "../../Controllers/Travel/Inquiry/TravelInquiry.js";
 import checkJwt from "../../Middleware/checkJwt.js";
 import { UserCategory } from "../../DataTypes/enums/IUserEnums.js";
 
@@ -142,4 +142,57 @@ router.patch("/TravelInquiry/status/:id",
     updateInquiryStatus
 );
 
+/**
+ * @swagger
+ * /ai/prompt:
+ *   post:
+ *     summary: Get AI response stream
+ *     description: Streams AI responses in real-time using Server-Sent Events (SSE)
+ *     tags: [AI]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userMessage
+ *             properties:
+ *               userMessage:
+ *                 type: string
+ *                 description: The user's message to send to the AI
+ *                 example: "What are some popular tourist attractions in Nepal?"
+ *               aiType:
+ *                 type: string
+ *                 description: Type of AI to use (defaults to 'chatgpt')
+ *                 enum: [chatgpt, claude, gemini]
+ *                 default: chatgpt
+ *               history:
+ *                 type: object
+ *                 description: Conversation history
+ *                 properties:
+ *                   messages:
+ *                     type: array
+ *                     items:
+ *                       type: object
+ *                       properties:
+ *                         role:
+ *                           type: string
+ *                           enum: [user, assistant]
+ *                         content:
+ *                           type: string
+ *     responses:
+ *       200:
+ *         description: SSE stream of AI responses
+ *         content:
+ *           text/event-stream:
+ *             schema:
+ *               type: string
+ *               example: "data: {'message': 'chunk'}\n\ndata: [DONE]\n\n"
+ *       400:
+ *         description: Invalid request body
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/ai/prompt", GetPrompt);
 export default router;
