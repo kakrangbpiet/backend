@@ -63,10 +63,16 @@ router.post("/TravelInquiry",
 
 /**
  * @swagger
- * /TravelInquiry/user:
+ * /TravelInquiry/{userId}:
  *   get:
  *     summary: Get all travel inquiries for the authenticated user
  *     tags: [Travel Inquiry]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -75,7 +81,7 @@ router.post("/TravelInquiry",
  *       401:
  *         description: Unauthorized
  */
-router.get("/TravelInquiry/user",
+router.get("/TravelInquiry/:userId",
     checkJwt([UserCategory.User,UserCategory.SUPER_ADMIN]),
     getUserInquiries);
 

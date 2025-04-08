@@ -66,6 +66,7 @@ model TravelInquiry {
   packageId        String
   packageTitle     String
   destination      String
+  departure      String
   passengerCount   Int
   travelDates      String
   specialRequests  String   @default("")

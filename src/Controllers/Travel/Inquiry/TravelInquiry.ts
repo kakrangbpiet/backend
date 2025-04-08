@@ -51,6 +51,7 @@ export const createTravelInquiry = async (
         packageId: inquiryData.packageId,
         packageTitle: inquiryData.packageTitle,
         destination: inquiryData.destination,
+        departure: inquiryData.departure,
         passengerCount: inquiryData.passengerCount,
         travelDates: inquiryData.travelDates,
         specialRequests: inquiryData.specialRequests || "",
@@ -96,7 +97,7 @@ export const getUserInquiries = async (
   next: NextFunction
 ) => {
   const childLogger = (req as any).childLogger as winston.Logger;
-  const userId = req.user?.id;
+  const { userId } = req.params;
 
   try {
     logWithMessageAndStep(
@@ -118,6 +119,7 @@ export const getUserInquiries = async (
         packageId: true,
         packageTitle: true,
         destination: true,
+        departure: true,
         passengerCount: true,
         travelDates: true,
         specialRequests: true,
@@ -185,6 +187,7 @@ export const getInquiryDetails = async (
           packageId: true,
           packageTitle: true,
           destination: true,
+          departure: true,
           passengerCount: true,
           travelDates: true,
           specialRequests: true,
