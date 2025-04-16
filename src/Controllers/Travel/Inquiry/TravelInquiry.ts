@@ -3,7 +3,7 @@ import winston from "winston";
 import { prisma } from "../../../Utils/db/client.js";
 import { logWithMessageAndStep } from "../../../Utils/Logger/logger.js";
 import { RequestWithUser } from "../../../Middleware/checkJwt.js";
-import { chatWithGPT } from "src/Projects/AI/Chatgpt/Chatgpt.js";
+import { chatWithGPT } from "../../../Projects/AI/Chatgpt/Chatgpt.js";
 
 /**
  * Create a new travel inquiry
