@@ -1,15 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 
-export const prisma = new PrismaClient({
-    log: ['warn', 'error'],
-    datasources: {
-      db: {
-        url: process.env.DATABASE_URL + (process.env.NODE_ENV === 'production' 
-          ? '?connection_limit=10' 
-          : '')
-      }
-    }
-  });
+export const prisma = new PrismaClient();
 
 export const isDatabaseHealthy = async (): Promise<boolean> => {
     try {
