@@ -59,6 +59,10 @@ model TravelPackage {
   updatedAt       DateTime   @updatedAt
 
   @@map("travel_packages")
+  @@index([status])
+  @@index([category])
+  @@index([location])
+  @@index([status, category])
 }
 
 model TravelInquiry {
