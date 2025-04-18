@@ -37,8 +37,6 @@ const router = express.Router({ mergeParams: true });
  *               properties:
  *                 data:
  *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/TravelPackage'
  *                 message:
  *                   type: string
  *                   example: "Travel packages fetched successfully"
@@ -72,8 +70,6 @@ router.get("/Travel/travelType",
  *               properties:
  *                 data:
  *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/TravelPackage'
  *                 message:
  *                   type: string
  *                   example: "Travel packages for category beach fetched successfully"
@@ -107,8 +103,6 @@ router.get("/Travel/travelCategory",
  *               properties:
  *                 data:
  *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/TravelPackage'
  *                 message:
  *                   type: string
  *                   example: "Travel packages for status beach fetched successfully"
@@ -140,8 +134,6 @@ router.get("/Travel/status", getTravelPackagesByStatus);
  *             schema:
  *               type: object
  *               properties:
- *                 data:
- *                   $ref: '#/components/schemas/TravelPackage'
  *                 message:
  *                   type: string
  *                   example: "Travel package fetched successfully"
@@ -164,8 +156,6 @@ router.get("/Travel/:id", getTravelPackageById);
  *       required: true
  *       content:
  *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/TravelPackageInput'
  *     responses:
  *       201:
  *         description: Travel package created successfully
@@ -174,8 +164,6 @@ router.get("/Travel/:id", getTravelPackageById);
  *             schema:
  *               type: object
  *               properties:
- *                 data:
- *                   $ref: '#/components/schemas/TravelPackage'
  *                 message:
  *                   type: string
  *                   example: "Travel package created successfully"
@@ -209,8 +197,6 @@ router.post("/Travel",
  *       required: true
  *       content:
  *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/TravelPackageInput'
  *     responses:
  *       200:
  *         description: Travel package updated successfully
@@ -219,8 +205,6 @@ router.post("/Travel",
  *             schema:
  *               type: object
  *               properties:
- *                 data:
- *                   $ref: '#/components/schemas/TravelPackage'
  *                 message:
  *                   type: string
  *                   example: "Travel package updated successfully"
@@ -271,8 +255,6 @@ router.patch("/Travel/:id",
  *             schema:
  *               type: object
  *               properties:
- *                 data:
- *                   $ref: '#/components/schemas/TravelPackage'
  *                 message:
  *                   type: string
  *                   example: "Travel package status updated successfully"

@@ -3,111 +3,108 @@ generator client {
 }
 
 datasource db {
-  provider = "mongodb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model superAdmin {
-  id             String    @id @default(auto()) @map("_id") @db.ObjectId
-  email          String    @unique(map: "email_2")
-  name           String
-  password       String
-  category       String     @unique(map: "category_1")
-  permissions    String[]
+  id          String   @id @default(uuid())
+  email       String   @unique
+  name        String
+  password    String
+  category    String   @unique
+  permissions String[]
 }
 
 model samsarauser {
-  id                     String                 @id @default(auto()) @map("_id") @db.ObjectId
-  accountStatus          String
-  address                String
-  category               String
-  createdAt              DateTime               @default(now()) @map("createdAt")
-  email                  String                 @unique(map: "email_1")
-  name                   String
-  phoneNumber            String                 @unique(map: "phoneNumber_1")
-  updatedAt              DateTime               @updatedAt @map("updatedAt")
-  permissions            String[]
-  roleId                 String?
-  razorpayPayments       String[]               @default([])
-  cartItems              Json[]
-  v                      Int?                   @ignore
+  id               String   @id @default(uuid())
+  accountStatus    String
+  address          String
+  category         String
+  createdAt        DateTime @default(now())
+  email            String   @unique
+  name             String
+  phoneNumber      String   @unique
+  updatedAt        DateTime @updatedAt
+  permissions      String[]
+  roleId           String?
+  razorpayPayments String[] @default([])
+ cartItems Json[] @default([])
 }
 
 model unverifiedsamsarauser {
-  id                     String                 @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt              DateTime               @default(now()) @map("createdAt")
-  phoneNumber            String                 @unique(map: "phoneNumber_1")
-  updatedAt              DateTime               @updatedAt @map("updatedAt")
-  v                      Int?                   @ignore
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  phoneNumber String   @unique
+  updatedAt   DateTime @updatedAt
 }
 
 model TravelPackage {
-  id                     String                 @id @default(auto()) @map("_id") @db.ObjectId
-  title           String
-  description     String
-  price           Float
-  originalPrice   Float?
-  image           String
-  images          String[]
-  location        String
-  category        String
-  status          String     @default("active")
-  maxTravelers    Int?
-  availableSpots  Int?
-  travelType      String?
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  id             String   @id @default(uuid())
+  title          String
+  description    String
+  price          Float
+  originalPrice  Float?
+  image          String
+  images         String[]
+  location       String
+  category       String
+  status         String   @default("active")
+  maxTravelers   Int?
+  availableSpots Int?
+  travelType     String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  @@map("travel_packages")
   @@index([status])
   @@index([category])
   @@index([location])
   @@index([status, category])
+  @@map("travel_packages")
 }
 
 model TravelInquiry {
-  id               String   @id @default(auto()) @map("_id") @db.ObjectId
-  packageId        String
-  packageTitle     String
-  destination      String
-  departure      String
-  passengerCount   Int
-  travelDates      String
-  specialRequests  String   @default("")
-  status          String  
+  id              String   @id @default(uuid())
+  packageId       String
+  packageTitle    String
+  destination     String
+  departure       String
+  passengerCount  Int
+  travelDates     String
+  specialRequests String   @default("")
+  status          String
   userId          String?
   name            String?
   email           String?
-  phoneNumber           String?
+  phoneNumber     String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   @@map("travel_inquiries")
 }
 
-
 model TravelBooking {
-  id               String   @id @default(auto()) @map("_id") @db.ObjectId
-  inquiryId        String   @unique
-  packageId        String
-  userId           String?
-  passengerCount   Int
-  status           String   @default("confirmed")
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
+  id             String   @id @default(uuid())
+  inquiryId      String   @unique
+  packageId      String
+  userId         String?
+  passengerCount Int
+  status         String   @default("confirmed")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
   @@map("travel_bookings")
 }
 
 model PaymentInfo {
-  id               String   @id @default(auto()) @map("_id") @db.ObjectId
-  bookingId        String   @unique
-  amount           Float
-  status           String   @default("pending")
-  paymentMethod    String
-  transactionId    String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id            String   @id @default(uuid())
+  bookingId     String   @unique
+  amount        Float
+  status        String   @default("pending")
+  paymentMethod String
+  transactionId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   @@map("payment_info")
 }
