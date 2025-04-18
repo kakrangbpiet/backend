@@ -8,7 +8,7 @@ export const isDatabaseHealthy = async (): Promise<boolean> => {
         console.log("Prisma Database Connected");
         return true;
     } catch (error) {
-        console.log("Prisma Database Not Connected");
+        console.log("Prisma Database Not Connected",error);
         return false
     }
 };
