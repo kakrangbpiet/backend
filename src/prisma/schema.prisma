@@ -54,6 +54,7 @@ model TravelPackage {
   maxTravelers   Int?
   availableSpots Int?
   travelType     String?
+  dateAvailabilities DateAvailability[]
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -64,12 +65,22 @@ model TravelPackage {
   @@map("travel_packages")
 }
 
+model DateAvailability {
+  id             String          @id @default(cuid())
+  startDate      Int             // Unix timestamp
+  endDate        Int             // Unix timestamp
+  maxTravelers   Int
+  availableSpots Int
+  travelPackage  TravelPackage   @relation(fields: [travelPackageId], references: [id])
+  travelPackageId String
+}
+
 model TravelInquiry {
   id              String   @id @default(uuid())
   packageId       String
   packageTitle    String
   destination     String
-  departure       String
+  address         String   @default("")
   passengerCount  Int
   travelDates     String
   specialRequests String   @default("")

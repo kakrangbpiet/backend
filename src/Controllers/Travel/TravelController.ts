@@ -3,8 +3,10 @@ import winston from "winston";
 import { prisma } from "../../Utils/db/client.js";
 import { logWithMessageAndStep } from "../../Utils/Logger/logger.js";
 
+// ... (previous imports remain the same)
+
 /**
- * Create a new travel package
+ * Create a new travel package with date availabilities
  */
 export const createTravelPackage = async (
   req: Request,
@@ -34,6 +36,15 @@ export const createTravelPackage = async (
       });
     }
 
+    // Calculate totals if date availabilities exist
+    let maxTravelers = packageData.maxTravelers || 0;
+    let availableSpots = packageData.availableSpots || 0;
+    
+    if (packageData.dateAvailabilities?.length > 0) {
+      maxTravelers = packageData.dateAvailabilities.reduce((sum: number, da: any) => sum + (da.maxTravelers || 0), 0);
+      availableSpots = packageData.dateAvailabilities.reduce((sum: number, da: any) => sum + (da.availableSpots || 0), 0);
+    }
+
     const newPackage = await prisma.travelPackage.create({
       data: {
         title: packageData.title,
@@ -45,9 +56,20 @@ export const createTravelPackage = async (
         location: packageData.location,
         category: packageData.category,
         status: packageData.status || "active",
-        maxTravelers: packageData.maxTravelers,
-        availableSpots: packageData.availableSpots,
-        travelType: packageData.travelType
+        maxTravelers: maxTravelers > 0 ? maxTravelers : null,
+        availableSpots: availableSpots > 0 ? availableSpots : null,
+        travelType: packageData.travelType,
+        dateAvailabilities: packageData.dateAvailabilities?.length > 0 ? {
+          create: packageData.dateAvailabilities.map((da: any) => ({
+            startDate: da.startDate,
+            endDate: da.endDate,
+            maxTravelers: da.maxTravelers,
+            availableSpots: da.availableSpots
+          }))
+        } : undefined
+      },
+      include: {
+        dateAvailabilities: true
       }
     });
 
@@ -76,6 +98,159 @@ export const createTravelPackage = async (
     next(error);
   }
 };
+
+/**
+ * Get travel package by ID with date availabilities
+ */
+export const getTravelPackageById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const childLogger = (req as any).childLogger as winston.Logger;
+  const { id } = req.params;
+
+  try {
+    logWithMessageAndStep(
+      childLogger,
+      "Step 1",
+      "Fetching travel package by ID",
+      "getTravelPackageById",
+      `ID: ${id}`,
+      "info"
+    );
+
+    const travelPackage = await prisma.travelPackage.findUnique({
+      where: { id },
+      include: {
+        dateAvailabilities: true
+      }
+    });
+
+    if (!travelPackage) {
+      return res.status(404).json({
+        error: "Travel package not found"
+      });
+    }
+
+    logWithMessageAndStep(
+      childLogger,
+      "Step 2",
+      "Successfully fetched travel package",
+      "getTravelPackageById",
+      `Found package with ID: ${id}`,
+      "info"
+    );
+
+    res.status(200).json({
+      data: travelPackage,
+      message: "Travel package fetched successfully"
+    });
+  } catch (error) {
+    logWithMessageAndStep(
+      childLogger,
+      "Error Step",
+      "Error fetching travel package",
+      "getTravelPackageById",
+      JSON.stringify(error),
+      "error"
+    );
+    next(error);
+  }
+};
+
+/**
+ * Update travel package with date availabilities
+ */
+export const updateTravelPackage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const childLogger = (req as any).childLogger as winston.Logger;
+  const { id } = req.params;
+  const packageData = req.body;
+
+  try {
+    logWithMessageAndStep(
+      childLogger,
+      "Step 1",
+      "Updating travel package",
+      "updateTravelPackage",
+      `ID: ${id}, Data: ${JSON.stringify(packageData)}`,
+      "info"
+    );
+
+    // First, delete all existing date availabilities
+    await prisma.dateAvailability.deleteMany({
+      where: { travelPackageId: id }
+    });
+
+    // Calculate totals if date availabilities exist
+    let maxTravelers = packageData.maxTravelers || 0;
+    let availableSpots = packageData.availableSpots || 0;
+    
+    if (packageData.dateAvailabilities?.length > 0) {
+      maxTravelers = packageData.dateAvailabilities.reduce((sum: number, da: any) => sum + (da.maxTravelers || 0), 0);
+      availableSpots = packageData.dateAvailabilities.reduce((sum: number, da: any) => sum + (da.availableSpots || 0), 0);
+    }
+
+    const updatedPackage = await prisma.travelPackage.update({
+      where: { id },
+      data: {
+        title: packageData.title,
+        description: packageData.description,
+        price: packageData.price,
+        originalPrice: packageData.originalPrice,
+        image: packageData.image,
+        images: packageData.images,
+        location: packageData.location,
+        category: packageData.category,
+        status: packageData.status,
+        maxTravelers: maxTravelers > 0 ? maxTravelers : null,
+        availableSpots: availableSpots > 0 ? availableSpots : null,
+        travelType: packageData.travelType,
+        dateAvailabilities: packageData.dateAvailabilities?.length > 0 ? {
+          create: packageData.dateAvailabilities.map((da: any) => ({
+            startDate: da.startDate,
+            endDate: da.endDate,
+            maxTravelers: da.maxTravelers,
+            availableSpots: da.availableSpots
+          }))
+        } : undefined
+      },
+      include: {
+        dateAvailabilities: true
+      }
+    });
+
+    logWithMessageAndStep(
+      childLogger,
+      "Step 2",
+      "Successfully updated travel package",
+      "updateTravelPackage",
+      `Updated package with ID: ${id}`,
+      "info"
+    );
+
+    res.status(200).json({
+      data: updatedPackage,
+      message: "Travel package updated successfully"
+    });
+  } catch (error) {
+    logWithMessageAndStep(
+      childLogger,
+      "Error Step",
+      "Error updating travel package",
+      "updateTravelPackage",
+      JSON.stringify(error),
+      "error"
+    );
+    next(error);
+  }
+};
+
+// ... (other controller methods remain the same, just ensure they include dateAvailabilities when needed)
 
 /**
  * Get all travel packages
@@ -129,128 +304,6 @@ export const getAllTravelPackages = async (
   }
 };
 
-/**
- * Get travel package by ID
- */
-export const getTravelPackageById = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const childLogger = (req as any).childLogger as winston.Logger;
-  const { id } = req.params;
-
-  try {
-    logWithMessageAndStep(
-      childLogger,
-      "Step 1",
-      "Fetching travel package by ID",
-      "getTravelPackageById",
-      `ID: ${id}`,
-      "info"
-    );
-
-    const travelPackage = await prisma.travelPackage.findUnique({
-      where: { id }
-    });
-
-    if (!travelPackage) {
-      return res.status(404).json({
-        error: "Travel package not found"
-      });
-    }
-
-    logWithMessageAndStep(
-      childLogger,
-      "Step 2",
-      "Successfully fetched travel package",
-      "getTravelPackageById",
-      `Found package with ID: ${id}`,
-      "info"
-    );
-
-    res.status(200).json({
-      data: travelPackage,
-      message: "Travel package fetched successfully"
-    });
-  } catch (error) {
-    logWithMessageAndStep(
-      childLogger,
-      "Error Step",
-      "Error fetching travel package",
-      "getTravelPackageById",
-      JSON.stringify(error),
-      "error"
-    );
-    next(error);
-  }
-};
-
-/**
- * Update travel package
- */
-export const updateTravelPackage = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const childLogger = (req as any).childLogger as winston.Logger;
-  const { id } = req.params;
-  const packageData = req.body;
-
-  try {
-    logWithMessageAndStep(
-      childLogger,
-      "Step 1",
-      "Updating travel package",
-      "updateTravelPackage",
-      `ID: ${id}, Data: ${JSON.stringify(packageData)}`,
-      "info"
-    );
-
-    const updatedPackage = await prisma.travelPackage.update({
-      where: { id },
-      data: {
-        title: packageData.title,
-        description: packageData.description,
-        price: packageData.price,
-        originalPrice: packageData.originalPrice,
-        image: packageData.image,
-        images: packageData.images,
-        location: packageData.location,
-        category: packageData.category,
-        status: packageData.status,
-        maxTravelers: packageData.maxTravelers,
-        availableSpots: packageData.availableSpots,
-        travelType: packageData.travelType
-      }
-    });
-
-    logWithMessageAndStep(
-      childLogger,
-      "Step 2",
-      "Successfully updated travel package",
-      "updateTravelPackage",
-      `Updated package with ID: ${id}`,
-      "info"
-    );
-
-    res.status(200).json({
-      data: updatedPackage,
-      message: "Travel package updated successfully"
-    });
-  } catch (error) {
-    logWithMessageAndStep(
-      childLogger,
-      "Error Step",
-      "Error updating travel package",
-      "updateTravelPackage",
-      JSON.stringify(error),
-      "error"
-    );
-    next(error);
-  }
-};
 
 /**
  * Delete travel package
