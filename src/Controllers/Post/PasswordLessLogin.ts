@@ -87,16 +87,18 @@ export const loginWithOtp = async (
                 category: true,
             },
         });
-        user = await prisma.superAdmin.findUnique({
-            where: { phoneNumber },
-            select: {
-                id: true,
-                email: true,
-                phoneNumber:true,
-                name: true,
-                category: true,
-            },
-        });
+        if(!user){
+            user = await prisma.superAdmin.findUnique({
+                where: { phoneNumber },
+                select: {
+                    id: true,
+                    email: true,
+                    phoneNumber:true,
+                    name: true,
+                    category: true,
+                },
+            });
+        }
 
         // If user is not found, save the user
         if (!user) {
@@ -221,17 +223,18 @@ export const verifyOtpLogin = async (
                 category: true,
             },
         });
-        user = await prisma.superAdmin.findUnique({
-            where: { phoneNumber },
-            select: {
-                id: true,
-                email: true,
-                phoneNumber:true,
-                name: true,
-                category: true,
-            },
-        });
-
+        if(user==null || undefined){
+            user = await prisma.superAdmin.findUnique({
+                where: { phoneNumber },
+                select: {
+                    id: true,
+                    email: true,
+                    phoneNumber:true,
+                    name: true,
+                    category: true,
+                },
+            });
+        }
         // If not in samsarauser, check unverifiedsamsarauser
         if (!user) {
             const unverifiedUser = await prisma.unverifiedsamsarauser.findUnique({
