@@ -82,7 +82,9 @@ model TravelInquiry {
   destination     String
   address         String   @default("")
   passengerCount  Int
-  travelDates     String
+  startDate       Int?     // Unix timestamp
+  endDate         Int?     // Unix timestamp
+  tripType        String   @default("pre-planned") // "pre-planned" or "custom"
   specialRequests String   @default("")
   status          String
   userId          String?

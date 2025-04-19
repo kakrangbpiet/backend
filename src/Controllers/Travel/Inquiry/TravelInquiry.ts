@@ -26,13 +26,27 @@ export const createTravelInquiry = async (
       "info"
     );
 
-    // Validate required fields based on interface
-    const requiredFields = ['packageId', 'packageTitle', 'destination', 'passengerCount', 'travelDates'];
+    // Validate required fields
+    const requiredFields = ['packageId', 'packageTitle', 'destination', 'passengerCount', 'tripType'];
     const missingFields = requiredFields.filter(field => !inquiryData[field]);
+
+    // Validate dates based on trip type
+    if (inquiryData.tripType === 'pre-planned' && (!inquiryData.startDate || !inquiryData.endDate)) {
+      missingFields.push('startDate', 'endDate');
+    } else if (inquiryData.tripType === 'custom' && (!inquiryData.startDate || !inquiryData.endDate)) {
+      missingFields.push('startDate', 'endDate');
+    }
 
     if (missingFields.length > 0) {
       return res.status(400).json({
         error: `Missing required fields: ${missingFields.join(', ')}`
+      });
+    }
+
+    // Validate date order
+    if (inquiryData.startDate && inquiryData.endDate && inquiryData.startDate > inquiryData.endDate) {
+      return res.status(400).json({
+        error: "End date must be after start date"
       });
     }
 
@@ -54,11 +68,12 @@ export const createTravelInquiry = async (
         destination: inquiryData.destination,
         address: inquiryData.address,
         passengerCount: inquiryData.passengerCount,
-        travelDates: inquiryData.travelDates,
+        startDate: inquiryData.startDate,
+        endDate: inquiryData.endDate,
+        tripType: inquiryData.tripType,
         specialRequests: inquiryData.specialRequests || "",
         status: "pending",
         userId: req.user?.id || null,
-        // Include IUser fields if provided
         name: inquiryData.name || null,
         email: inquiryData.email || null,
         phoneNumber: inquiryData.phoneNumber || null
@@ -122,11 +137,12 @@ export const getUserInquiries = async (
         destination: true,
         address: true,
         passengerCount: true,
-        travelDates: true,
+        startDate: true,
+        endDate: true,
+        tripType: true,
         specialRequests: true,
         status: true,
         createdAt: true,
-        // IUser fields
         name: true,
         email: true,
         phoneNumber: true,
@@ -158,82 +174,83 @@ export const getUserInquiries = async (
     next(error);
   }
 };
-
 /**
  * Get inquiry details by ID
  */
 export const getInquiryDetails = async (
-    req: RequestWithUser,
-    res: Response,
-    next: NextFunction
-  ) => {
-    const childLogger = (req as any).childLogger as winston.Logger;
-    const { id } = req.params;
-    const userId = req.user?.id; // For authorization check
-  
-    try {
-      logWithMessageAndStep(
-        childLogger,
-        "Step 1",
-        "Fetching inquiry details",
-        "getInquiryDetails",
-        `Inquiry ID: ${id}`,
-        "info"
-      );
-  
-      const inquiry = await prisma.travelInquiry.findUnique({
-        where: { id },
-        select: {
-          id: true,
-          packageId: true,
-          packageTitle: true,
-          destination: true,
-          address: true,
-          passengerCount: true,
-          travelDates: true,
-          specialRequests: true,
-          status: true,
-          createdAt: true,
-          // IUser fields
-          name: true,
-          email: true,
-          phoneNumber: true,
-        
-        }
-      });
-  
-      if (!inquiry) {
-        return res.status(404).json({
-          error: "Inquiry not found"
-        });
+  req: RequestWithUser,
+  res: Response,
+  next: NextFunction
+) => {
+  const childLogger = (req as any).childLogger as winston.Logger;
+  const { id } = req.params;
+  const userId = req.user?.id;
+
+  try {
+    logWithMessageAndStep(
+      childLogger,
+      "Step 1",
+      "Fetching inquiry details",
+      "getInquiryDetails",
+      `Inquiry ID: ${id}`,
+      "info"
+    );
+
+    const inquiry = await prisma.travelInquiry.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        packageId: true,
+        packageTitle: true,
+        destination: true,
+        address: true,
+        passengerCount: true,
+        startDate: true,
+        endDate: true,
+        tripType: true,
+        specialRequests: true,
+        status: true,
+        createdAt: true,
+        name: true,
+        email: true,
+        phoneNumber: true,
       }
-  
-  
-      logWithMessageAndStep(
-        childLogger,
-        "Step 2",
-        "Successfully fetched inquiry details",
-        "getInquiryDetails",
-        `Found inquiry with ID: ${id}`,
-        "info"
-      );
-  
-      res.status(200).json({
-        data: inquiry,
-        message: "Inquiry details fetched successfully"
+    });
+
+    if (!inquiry) {
+      return res.status(404).json({
+        error: "Inquiry not found"
       });
-    } catch (error) {
-      logWithMessageAndStep(
-        childLogger,
-        "Error Step",
-        "Error fetching inquiry details",
-        "getInquiryDetails",
-        JSON.stringify(error),
-        "error"
-      );
-      next(error);
     }
-  };
+
+    logWithMessageAndStep(
+      childLogger,
+      "Step 2",
+      "Successfully fetched inquiry details",
+      "getInquiryDetails",
+      `Found inquiry with ID: ${id}`,
+      "info"
+    );
+
+    res.status(200).json({
+      data: inquiry,
+      message: "Inquiry details fetched successfully"
+    });
+  } catch (error) {
+    logWithMessageAndStep(
+      childLogger,
+      "Error Step",
+      "Error fetching inquiry details",
+      "getInquiryDetails",
+      JSON.stringify(error),
+      "error"
+    );
+    next(error);
+  }
+};
+
+
+
 
 // Update status values in updateInquiryStatus
 export const updateInquiryStatus = async (
