@@ -250,8 +250,6 @@ export const updateTravelPackage = async (
   }
 };
 
-// ... (other controller methods remain the same, just ensure they include dateAvailabilities when needed)
-
 /**
  * Get all travel packages
  */
@@ -275,6 +273,9 @@ export const getAllTravelPackages = async (
     const packages = await prisma.travelPackage.findMany({
       orderBy: {
         createdAt: "desc"
+      },
+      include: {
+        dateAvailabilities: true
       }
     });
 
@@ -388,6 +389,9 @@ export const getTravelPackagesByStatus = async (
       },
       orderBy: {
         createdAt: "desc"
+      },
+      include: {
+        dateAvailabilities: true
       }
     });
 
@@ -455,6 +459,9 @@ export const getTravelItemsByCategory = async (
       where: filters,
       orderBy: {
         createdAt: "desc"
+      },
+      include: {
+        dateAvailabilities: true
       }
     });
 
@@ -483,7 +490,6 @@ export const getTravelItemsByCategory = async (
     next(error);
   }
 };
-
 
 /**
  * Update travel package status
