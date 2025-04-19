@@ -6,10 +6,10 @@ export const InitSuperAdminSchema = z.object({
   email: z.string(),
   password: z.string(),
   name: z.string(),
-  category: z.union([
-    z.literal(UserCategory.SUPER_ADMIN),
-    z.literal(UserCategory.SUPER_ADMIN),
-  ]),
+  phoneNumber: z.string()
+    .nonempty({ message: "Phone number is required" }) // Custom error message for empty phone number
+    .regex(/^\d{10}$/, { message: "Phone number must be 10 digits" }), // Custom error message for invalid phone number format
+
 })
 
 export const RegisterUserSchema = z.object({

@@ -28,6 +28,12 @@ const router = express.Router({ mergeParams: true });
  *               password:
  *                 type: string
  *                 example: "password123"
+ *               phoneNumber:
+ *                 type: string
+ *                 example: "1010101010"
+ *               category:
+ *                 type: string
+ *                 example: "user"
  *     responses:
  *       200:
  *         description: Super admin created successfully

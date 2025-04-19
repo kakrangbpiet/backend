@@ -21,10 +21,10 @@ CREATE TABLE "samsarauser" (
     "name" TEXT NOT NULL,
     "phoneNumber" TEXT NOT NULL,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "permissions" TEXT[],
+    "permissions" TEXT[] DEFAULT ARRAY[]::TEXT[],
     "roleId" TEXT,
     "razorpayPayments" TEXT[] DEFAULT ARRAY[]::TEXT[],
-    "cartItems" JSONB NOT NULL,
+    "cartItems" JSONB[] DEFAULT ARRAY[]::JSONB[],
 
     CONSTRAINT "samsarauser_pkey" PRIMARY KEY ("id")
 );

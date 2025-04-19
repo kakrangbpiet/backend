@@ -11,8 +11,9 @@ model superAdmin {
   id          String   @id @default(uuid())
   email       String   @unique
   name        String
+  phoneNumber     String?  @unique 
   password    String
-  category    String   @unique
+  category    String
   permissions String[]
 }
 
@@ -26,10 +27,10 @@ model samsarauser {
   name             String
   phoneNumber      String   @unique
   updatedAt        DateTime @updatedAt
-  permissions      String[]
+  permissions      String[] @default([])
   roleId           String?
   razorpayPayments String[] @default([])
- cartItems Json[] @default([])
+  cartItems Json[] @default([])
 }
 
 model unverifiedsamsarauser {

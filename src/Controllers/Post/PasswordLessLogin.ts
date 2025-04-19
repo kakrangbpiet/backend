@@ -8,6 +8,7 @@ import { ErrorEnum, DbError } from "../../DataTypes/enums/Error.js";
 import { IUser } from "../../DataTypes/Interfaces/IUser.js";
 import { PasswordLessUserValidation } from "../../Validation/UserValidation.js";
 import { generateTokens, refreshAccessToken } from "../../Utils/scripts/jwtToken.js";
+import { Prisma } from "@prisma/client";
 
 /**
  * add new user
@@ -17,22 +18,36 @@ export const addUser = async (userModelValidation: IUser, childLogger: any) => {
     try {
         logWithMessageAndStep(childLogger, "Step 8", "Adding User via PrismaDB", "register", JSON.stringify(userModelValidation), "debug")
 
-        const newUser = await prisma.samsarauser.create({
-            data: {
-                email: userModelValidation.email,
-                name: userModelValidation.name,
-                phoneNumber: userModelValidation.phoneNumber,
-                address: userModelValidation.address,
-                category: userModelValidation.category,
-                accountStatus: userModelValidation.accountStatus || "pending"
-            }
+        const newUser = await prisma.$transaction(async (prisma) => {
+            await prisma.unverifiedsamsarauser.deleteMany({
+                where: { phoneNumber: userModelValidation.phoneNumber },
+            });
+            
+            return await prisma.samsarauser.create({
+                data: {
+                    email: userModelValidation.email,
+                    name: userModelValidation.name,
+                    phoneNumber: userModelValidation.phoneNumber,
+                    address: userModelValidation.address,
+                    category: userModelValidation.category,
+                    accountStatus: userModelValidation.accountStatus || "pending",
+                }
+            });
         });
         logWithMessageAndStep(childLogger, "Step 9", "User added to database", "register", JSON.stringify(newUser), "debug")
 
         return newUser;
     } catch (error) {
         logWithMessageAndStep(childLogger, "Error step addUser", "Error while adding User in PrismaDB", "register", JSON.stringify(error), "error")
-        throw DbError.ErrorOfMongoose()
+        console.error("Detailed Prisma error:", error);
+        
+        // Throw specific Prisma errors
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            if (error.code === 'P2002') {
+                throw ErrorEnum.SignUpValidationError("Duplicate entry - user already exists");
+            }
+        }
+        throw DbError.ErrorOfPrisma(error);
     }
 };
 
@@ -48,7 +63,7 @@ export const loginWithOtp = async (
         return next(new Error("Internal Server Error"));
     }
 
-    const { phoneNumber, deviceId } = req.body;
+    const { phoneNumber,email, deviceId } = req.body;
 
     try {
         logWithMessageAndStep(
@@ -72,30 +87,52 @@ export const loginWithOtp = async (
                 category: true,
             },
         });
+        user = await prisma.superAdmin.findUnique({
+            where: { phoneNumber },
+            select: {
+                id: true,
+                email: true,
+                phoneNumber:true,
+                name: true,
+                category: true,
+            },
+        });
 
         // If user is not found, save the user
         if (!user) {
-
-            user = await prisma.unverifiedsamsarauser.findUnique({
-                where: { phoneNumber },
-                select: { id: true, phoneNumber: true },
-            });
-            if (!user) {
-                user = await prisma.unverifiedsamsarauser.create({
-                    data: {
-                        phoneNumber: phoneNumber,
-                    }
+            try {
+                user = await prisma.unverifiedsamsarauser.findUnique({
+                    where: { phoneNumber },
+                    select: { id: true, phoneNumber: true },
                 });
+                if (!user) {
+                    user = await prisma.unverifiedsamsarauser.create({
+                        data: {
+                            phoneNumber: phoneNumber,
+                        }
+                    });
+                }
+    
+                logWithMessageAndStep(
+                    childLogger,
+                    "Step 2",
+                    "User registered successfully",
+                    "loginWithOtp",
+                    JSON.stringify(user),
+                    "info"
+                );
+            } catch (error) {
+                logWithMessageAndStep(
+                    childLogger,
+                    "Error Step",
+                    "Error while fetching user",
+                    "loginWithOtp",
+                    JSON.stringify(error),
+                    "error"
+                );
+                throw DbError.ErrorOfPrisma(error);
             }
-
-            logWithMessageAndStep(
-                childLogger,
-                "Step 2",
-                "User registered successfully",
-                "loginWithOtp",
-                JSON.stringify(user),
-                "info"
-            );
+  
         }
 
         // Send OTP
@@ -173,15 +210,25 @@ export const verifyOtpLogin = async (
         }
 
         // Fetch user details from samsarauser
-        let user = await prisma.samsarauser.findUnique({
+        let user
+        user = await prisma.samsarauser.findUnique({
             where: { phoneNumber },
             select: {
                 id: true,
-                phoneNumber: true,
-                category: true,
-                address: true,
                 email: true,
                 name: true,
+                phoneNumber: true,
+                category: true,
+            },
+        });
+        user = await prisma.superAdmin.findUnique({
+            where: { phoneNumber },
+            select: {
+                id: true,
+                email: true,
+                phoneNumber:true,
+                name: true,
+                category: true,
             },
         });
 
@@ -385,12 +432,12 @@ export const registerUser = async (
             throw ErrorEnum.SignUpValidationError(userModelValidation.email);
         }
 
+        
+        // Register the user
+        const newUser = await addUser(userModelValidation, childLogger);
         await prisma.unverifiedsamsarauser.deleteMany({
             where: { phoneNumber: userModelValidation.phoneNumber },
         });
-
-        // Register the user
-        const newUser = await addUser(userModelValidation, childLogger);
 
         logWithMessageAndStep(
             childLogger,
@@ -527,6 +574,8 @@ export const getAllUsers = async (
             JSON.stringify(error),
             "error"
         );
+        console.log(error);
+        
         return next(DbError.ErrorOfMongoose());
     }
 };

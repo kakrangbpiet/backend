@@ -61,6 +61,7 @@ export const Create_superAdmin = async (
         const newUser = await prisma.superAdmin.create({
             data: {
                 email: systemAdminValidation.email,
+                phoneNumber: systemAdminValidation.phoneNumber,
                 name: systemAdminValidation.name,
                 password: systemAdminValidation.password,
                 category: systemAdminValidation.category || UserCategory.SUPER_ADMIN,

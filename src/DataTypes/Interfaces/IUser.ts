@@ -7,6 +7,7 @@ export interface IsystemAdmin {
     email: string;
     password: string;
     name: string
+    phoneNumber?: string;
     category?: UserCategory,
     permissions?: string[]
 }

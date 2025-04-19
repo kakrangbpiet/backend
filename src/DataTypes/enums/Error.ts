@@ -17,6 +17,11 @@ export const DbError = {
         message: "Prisma is not connected",
         details: ""
     }),
+    ErrorOfPrisma: (err:any): ErrorObject => ({
+        statusCode: 400,
+        message: "Prisma Error",
+        details: err
+    }),
 }
 
 export const ErrorEnum = {
