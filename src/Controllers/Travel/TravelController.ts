@@ -3,7 +3,6 @@ import winston from "winston";
 import { prisma } from "../../Utils/db/client.js";
 import { logWithMessageAndStep } from "../../Utils/Logger/logger.js";
 
-// ... (previous imports remain the same)
 
 /**
  * Create a new travel package with date availabilities
@@ -66,10 +65,16 @@ export const createTravelPackage = async (
             maxTravelers: da.maxTravelers,
             availableSpots: da.availableSpots
           }))
-        } : undefined
+        } : undefined,
+        videos: packageData.videoList?.length > 0 ? {
+          create: packageData.videoList.map((video: any) => ({
+            base64Data: video.base64Data
+          }))
+        } : undefined,
       },
       include: {
-        dateAvailabilities: true
+        dateAvailabilities: true,
+        videos: true
       }
     });
 
@@ -160,7 +165,7 @@ export const getTravelPackageById = async (
 };
 
 /**
- * Update travel package with date availabilities
+ * Update travel package with date availabilities and videos
  */
 export const updateTravelPackage = async (
   req: Request,
@@ -181,15 +186,20 @@ export const updateTravelPackage = async (
       "info"
     );
 
-    // First, delete all existing date availabilities
+    // Delete existing date availabilities
     await prisma.dateAvailability.deleteMany({
       where: { travelPackageId: id }
     });
 
-    // Calculate totals if date availabilities exist
+    // Delete existing videos
+    await prisma.travelVideo.deleteMany({
+      where: { travelPackageId: id }
+    });
+
+    // Calculate totals
     let maxTravelers = packageData.maxTravelers || 0;
     let availableSpots = packageData.availableSpots || 0;
-    
+
     if (packageData.dateAvailabilities?.length > 0) {
       maxTravelers = packageData.dateAvailabilities.reduce((sum: number, da: any) => sum + (da.maxTravelers || 0), 0);
       availableSpots = packageData.dateAvailabilities.reduce((sum: number, da: any) => sum + (da.availableSpots || 0), 0);
@@ -203,24 +213,34 @@ export const updateTravelPackage = async (
         price: packageData.price,
         originalPrice: packageData.originalPrice,
         image: packageData.image,
-        images: packageData.images,
+        images: packageData.images || [],
         location: packageData.location,
         category: packageData.category,
-        status: packageData.status,
+        status: packageData.status || "active",
         maxTravelers: maxTravelers > 0 ? maxTravelers : null,
         availableSpots: availableSpots > 0 ? availableSpots : null,
         travelType: packageData.travelType,
-        dateAvailabilities: packageData.dateAvailabilities?.length > 0 ? {
-          create: packageData.dateAvailabilities.map((da: any) => ({
-            startDate: da.startDate,
-            endDate: da.endDate,
-            maxTravelers: da.maxTravelers,
-            availableSpots: da.availableSpots
-          }))
-        } : undefined
+        dateAvailabilities: packageData.dateAvailabilities?.length > 0
+          ? {
+              create: packageData.dateAvailabilities.map((da: any) => ({
+                startDate: da.startDate,
+                endDate: da.endDate,
+                maxTravelers: da.maxTravelers,
+                availableSpots: da.availableSpots
+              }))
+            }
+          : undefined,
+        videos: packageData.videoList?.length > 0
+          ? {
+              create: packageData.videoList.map((video: any) => ({
+                base64Data: video.base64Data
+              }))
+            }
+          : undefined
       },
       include: {
-        dateAvailabilities: true
+        dateAvailabilities: true,
+        videos: true
       }
     });
 
@@ -229,7 +249,7 @@ export const updateTravelPackage = async (
       "Step 2",
       "Successfully updated travel package",
       "updateTravelPackage",
-      `Updated package with ID: ${id}`,
+      `Updated package ID: ${id}`,
       "info"
     );
 
@@ -249,6 +269,7 @@ export const updateTravelPackage = async (
     next(error);
   }
 };
+
 
 /**
  * Get all travel packages
@@ -550,6 +571,50 @@ export const updateTravelPackageStatus = async (
       "Error Step",
       "Error updating travel package status",
       "updateTravelPackageStatus",
+      JSON.stringify(error),
+      "error"
+    );
+    next(error);
+  }
+};
+
+
+
+/**
+ * Get videos by travel package ID
+ */
+export const getVideosByPackageId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const childLogger = (req as any).childLogger as winston.Logger;
+  const { id } = req.params;
+
+  try {
+    logWithMessageAndStep(
+      childLogger,
+      "Step 1",
+      "Fetching videos for travel package",
+      "getVideosByPackageId",
+      `ID: ${id}`,
+      "info"
+    );
+
+    const videos = await prisma.travelVideo.findMany({
+      where: { travelPackageId: id }
+    });
+
+    res.status(200).json({
+      data: videos,
+      message: "Videos fetched successfully"
+    });
+  } catch (error) {
+    logWithMessageAndStep(
+      childLogger,
+      "Error Step",
+      "Error fetching videos",
+      "getVideosByPackageId",
       JSON.stringify(error),
       "error"
     );

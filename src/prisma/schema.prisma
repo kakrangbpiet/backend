@@ -5,6 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  
 }
 
 model superAdmin {
@@ -55,6 +56,7 @@ model TravelPackage {
   availableSpots Int?
   travelType     String?
   dateAvailabilities DateAvailability[]
+  videos         TravelVideo[]   
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -63,6 +65,15 @@ model TravelPackage {
   @@index([location])
   @@index([status, category])
   @@map("travel_packages")
+}
+
+model TravelVideo {
+  id           String   @id @default(uuid())
+  base64Data   String   // base64-encoded video string
+  travelPackageId String
+  travelPackage   TravelPackage @relation(fields: [travelPackageId], references: [id])
+
+  createdAt    DateTime @default(now())
 }
 
 model DateAvailability {
