@@ -66,9 +66,9 @@ export const createTravelPackage = async (
             availableSpots: da.availableSpots
           }))
         } : undefined,
-        videos: packageData.videoList?.length > 0 ? {
-          create: packageData.videoList.map((video: any) => ({
-            base64Data: video.base64Data
+        videos: packageData.videos?.length > 0 ? {
+          create: packageData.videos.map((video: any) => ({
+            base64Data: video
           }))
         } : undefined,
       },
@@ -131,6 +131,8 @@ export const getTravelPackageById = async (
         dateAvailabilities: true
       }
     });
+    console.log(travelPackage);
+    
 
     if (!travelPackage) {
       return res.status(404).json({
@@ -230,10 +232,10 @@ export const updateTravelPackage = async (
               }))
             }
           : undefined,
-        videos: packageData.videoList?.length > 0
+        videos: packageData.videos?.length > 0
           ? {
-              create: packageData.videoList.map((video: any) => ({
-                base64Data: video.base64Data
+              create: packageData.videos.map((video: any) => ({
+                base64Data: video
               }))
             }
           : undefined
@@ -605,6 +607,8 @@ export const getVideosByPackageId = async (
       where: { travelPackageId: id }
     });
 
+    console.log(videos);
+    
     res.status(200).json({
       data: videos,
       message: "Videos fetched successfully"
