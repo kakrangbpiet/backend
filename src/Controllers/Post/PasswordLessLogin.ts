@@ -577,7 +577,6 @@ export const getAllUsers = async (
             JSON.stringify(error),
             "error"
         );
-        console.log(error);
         
         return next(DbError.ErrorOfMongoose());
     }

@@ -66,7 +66,6 @@ export default function checkJwt(
                 throw ErrorEnum.InvalidJwt(err);
             }
         } catch (error) {
-            console.log(error);
             next(error);
         }
     };

@@ -128,11 +128,9 @@ export const getTravelPackageById = async (
     const travelPackage = await prisma.travelPackage.findUnique({
       where: { id },
       include: {
-        dateAvailabilities: true
+        dateAvailabilities: true,
       }
     });
-    console.log(travelPackage);
-    
 
     if (!travelPackage) {
       return res.status(404).json({
@@ -583,7 +581,7 @@ export const updateTravelPackageStatus = async (
 
 
 /**
- * Get videos by travel package ID
+ * Get videos by travel package ID, including array length and a random video
  */
 export const getVideosByPackageId = async (
   req: Request,
@@ -602,15 +600,28 @@ export const getVideosByPackageId = async (
       `ID: ${id}`,
       "info"
     );
-
-    const videos = await prisma.travelVideo.findMany({
+    // Count videos without fetching them
+    const videoCount = await prisma.travelVideo.count({
       where: { travelPackageId: id }
     });
 
-    console.log(videos);
-    
+    // Fetch one random video if available
+    let randomVideo:any = [];
+    if (videoCount > 0) {
+      const randomIndex = Math.floor(Math.random() * videoCount);
+      const randomVideos = await prisma.travelVideo.findMany({
+        where: { travelPackageId: id },
+        skip: randomIndex,
+        take: 1
+      });
+      randomVideo = randomVideos[0] || [];
+    }
+
     res.status(200).json({
-      data: videos,
+      data: {
+        videoCount,
+        randomVideo
+      },
       message: "Videos fetched successfully"
     });
   } catch (error) {
@@ -625,3 +636,4 @@ export const getVideosByPackageId = async (
     next(error);
   }
 };
+
