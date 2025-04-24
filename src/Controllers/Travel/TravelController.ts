@@ -272,7 +272,7 @@ export const updateTravelPackage = async (
 
 
 /**
- * Get all travel packages
+ * Get all travel packages with pagination
  */
 export const getAllTravelPackages = async (
   req: Request,
@@ -291,7 +291,29 @@ export const getAllTravelPackages = async (
       "info"
     );
 
+    // Get pagination parameters from query
+    const page = parseInt(req.query.page as string) || 1;
+    const pageSize = parseInt(req.query.pageSize as string) || 10;
+    const skip = (page - 1) * pageSize;
+
+    // Get filter parameters
+    const status = req.query.status as string | undefined;
+    const location = req.query.location as string | undefined;
+    const category = req.query.category as string | undefined;
+
+    // Build where clause
+    const where: any = {};
+    if (status) where.status = status;
+    if (location) where.location = location;
+    if (category) where.category = category;
+
+    // Get total count for pagination metadata
+    const totalCount = await prisma.travelPackage.count({ where });
+
     const packages = await prisma.travelPackage.findMany({
+      where,
+      skip,
+      take: pageSize,
       orderBy: {
         createdAt: "desc"
       },
@@ -311,6 +333,10 @@ export const getAllTravelPackages = async (
 
     res.status(200).json({
       data: packages,
+      total: totalCount,
+      page,
+      pageSize,
+      totalPages: Math.ceil(totalCount / pageSize),
       message: "Travel packages fetched successfully"
     });
   } catch (error) {
