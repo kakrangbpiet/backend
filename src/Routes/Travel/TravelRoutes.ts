@@ -8,7 +8,10 @@ import {
   getTravelPackagesByStatus,
   getTravelItemsByCategory,
   updateTravelPackageStatus,
-  getVideosByPackageId
+  getVideosByPackageId,
+  getAllCategories,
+  getAllLocations,
+  getAllTitles
 } from "../../Controllers/Travel/TravelController.js";
 import checkJwt from "../../Middleware/checkJwt.js";
 import { UserCategory } from "../../DataTypes/enums/IUserEnums.js";
@@ -114,36 +117,6 @@ router.get("/Travel/travelCategory",
  */
 router.get("/Travel/status", getTravelPackagesByStatus);
 
-/**
- * @swagger
- * /Travel:
- *   get:
- *     summary: Get a specific travel package by ID
- *     tags: [Travel]
- *     parameters:
- *       - in: path
- *         name: id
- *         schema:
- *           type: string
- *         required: true
- *         description: Travel package ID
- *     responses:
- *       200:
- *         description: Travel package details
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: "Travel package fetched successfully"
- *       404:
- *         description: Travel package not found
- *       500:
- *         description: Internal server error
- */
-router.get("/Travel/:id", getTravelPackageById);
 
 /**
  * @swagger
@@ -343,5 +316,120 @@ router.delete("/Travel/:id",
  *         description: Internal server error
  */
 router.get("/Travel/videos/:id", getVideosByPackageId);
+
+
+/**
+ * @swagger
+ * /Travel/categories:
+ *   get:
+ *     summary: Get all distinct categories from travel packages
+ *     tags: [Travel]
+ *     responses:
+ *       200:
+ *         description: List of all distinct categories
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["beach", "mountain", "city"]
+ *                 message:
+ *                   type: string
+ *                   example: "Categories fetched successfully"
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/Travel/categories", getAllCategories);
+
+/**
+ * @swagger
+ * /Travel/locations:
+ *   get:
+ *     summary: Get all distinct locations from travel packages
+ *     tags: [Travel]
+ *     responses:
+ *       200:
+ *         description: List of all distinct locations
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["Paris", "Tokyo", "New York"]
+ *                 message:
+ *                   type: string
+ *                   example: "Locations fetched successfully"
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/Travel/locations", getAllLocations);
+
+/**
+ * @swagger
+ * /Travel/titles:
+ *   get:
+ *     summary: Get all distinct titles from travel packages
+ *     tags: [Travel]
+ *     responses:
+ *       200:
+ *         description: List of all distinct titles
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   example: ["Summer Vacation", "Winter Getaway", "City Break"]
+ *                 message:
+ *                   type: string
+ *                   example: "Titles fetched successfully"
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/Travel/titles", getAllTitles);
+
+
+/**
+ * @swagger
+ * /Travel:
+ *   get:
+ *     summary: Get a specific travel package by ID
+ *     tags: [Travel]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Travel package ID
+ *     responses:
+ *       200:
+ *         description: Travel package details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Travel package fetched successfully"
+ *       404:
+ *         description: Travel package not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/Travel/:id", getTravelPackageById);
+
 
 export default router;

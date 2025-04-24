@@ -637,3 +637,86 @@ export const getVideosByPackageId = async (
   }
 };
 
+/**
+ * Get all distinct categories from travel packages
+ */
+export const getAllCategories = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const childLogger = (req as any).childLogger as winston.Logger;
+  try {
+    logWithMessageAndStep(childLogger, "Step 1", "Fetching all categories", "getAllCategories", "", "info");
+
+    const categories = await prisma.travelPackage.findMany({
+      distinct: ['category'],
+      select: { category: true },
+    });
+
+    res.status(200).json({
+      data: categories.map(c => c.category),
+      message: "Categories fetched successfully"
+    });
+  } catch (error) {
+    logWithMessageAndStep(childLogger, "Error Step", "Error fetching categories", "getAllCategories", JSON.stringify(error), "error");
+    next(error);
+  }
+};
+
+/**
+ * Get all distinct locations from travel packages
+ */
+export const getAllLocations = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const childLogger = (req as any).childLogger as winston.Logger;
+  try {
+    logWithMessageAndStep(childLogger, "Step 1", "Fetching all locations", "getAllLocations", "", "info");
+
+    const locations = await prisma.travelPackage.findMany({
+      distinct: ['location'],
+      select: { location: true },
+    });
+
+    res.status(200).json({
+      data: locations.map(l => l.location),
+      message: "Locations fetched successfully"
+    });
+  } catch (error) {
+    logWithMessageAndStep(childLogger, "Error Step", "Error fetching locations", "getAllLocations", JSON.stringify(error), "error");
+    next(error);
+  }
+};
+
+/**
+ * Get all distinct titles from travel packages
+ */
+export const getAllTitles = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const childLogger = (req as any).childLogger as winston.Logger;
+  try {
+    logWithMessageAndStep(childLogger, "Step 1", "Fetching all titles", "getAllTitles", "", "info");
+
+    const titles = await prisma.travelPackage.findMany({
+      distinct: ['title'],
+      select: { id: true, title: true },
+    });
+
+    res.status(200).json({
+      data: titles,
+      message: "Titles fetched successfully"
+    });
+  } catch (error) {
+    console.log(error);
+    
+    logWithMessageAndStep(childLogger, "Error Step", "Error fetching titles", "getAllTitles", JSON.stringify(error), "error");
+    next(error);
+  }
+};
+
