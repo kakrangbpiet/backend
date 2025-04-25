@@ -272,7 +272,7 @@ export const updateTravelPackage = async (
 
 
 /**
- * Get all travel packages with pagination
+ * Get all travel packages with pagination and field selection
  */
 export const getAllTravelPackages = async (
   req: Request,
@@ -301,6 +301,54 @@ export const getAllTravelPackages = async (
     const location = req.query.location as string | undefined;
     const category = req.query.category as string | undefined;
 
+    // Get fields to select from query
+    const selectFields = req.query.select as string | undefined;
+    let select: any = undefined;
+
+    if (selectFields) {
+      // If specific fields are requested, build the select object
+      const fields = selectFields.split(',');
+      select = {
+        id: fields.includes('id'),
+        title: fields.includes('title'),
+        description: fields.includes('description'),
+        price: fields.includes('price'),
+        originalPrice: fields.includes('originalPrice'),
+        image: fields.includes('image'),
+        location: fields.includes('location'),
+        category: fields.includes('category'),
+        status: fields.includes('status'),
+        maxTravelers: fields.includes('maxTravelers'),
+        availableSpots: fields.includes('availableSpots'),
+        travelType: fields.includes('travelType'),
+        createdAt: fields.includes('createdAt'),
+        updatedAt: fields.includes('updatedAt'),
+        dateAvailabilities: fields.includes('dateAvailabilities')
+      };
+
+      // Always include id for reference
+      select.id = true;
+    } else {
+      // If no fields specified, include all except videos
+      select = {
+        id: true,
+        title: true,
+        description: true,
+        price: true,
+        originalPrice: true,
+        image: true,
+        location: true,
+        category: true,
+        status: true,
+        maxTravelers: true,
+        availableSpots: true,
+        travelType: true,
+        createdAt: true,
+        updatedAt: true,
+        dateAvailabilities: true
+      };
+    }
+
     // Build where clause
     const where: any = {};
     if (status) where.status = status;
@@ -317,9 +365,7 @@ export const getAllTravelPackages = async (
       orderBy: {
         createdAt: "desc"
       },
-      include: {
-        dateAvailabilities: true
-      }
+      select
     });
 
     logWithMessageAndStep(
