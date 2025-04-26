@@ -55,6 +55,7 @@ model TravelPackage {
   maxTravelers   Int?
   availableSpots Int?
   travelType     String?
+  activities     String[]
   dateAvailabilities DateAvailability[]
   videos         TravelVideo[]   
   createdAt      DateTime @default(now())

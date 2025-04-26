@@ -67,11 +67,13 @@ export const createTravelPackage = async (
             originalPrice: da.originalPrice
           }))
         } : undefined,
+        activities: packageData.activities || [], 
         videos: packageData.videos?.length > 0 ? {
           create: packageData.videos.map((video: any) => ({
             base64Data: video
           }))
         } : undefined,
+        
       },
       include: {
         dateAvailabilities: true,
@@ -133,6 +135,7 @@ export const getTravelPackageById = async (
       }
     });
 
+    
     if (!travelPackage) {
       return res.status(404).json({
         error: "Travel package not found"
@@ -220,6 +223,7 @@ export const updateTravelPackage = async (
         maxTravelers: maxTravelers > 0 ? maxTravelers : null,
         availableSpots: availableSpots > 0 ? availableSpots : null,
         travelType: packageData.travelType,
+        activities: packageData.activities || [], 
         dateAvailabilities: packageData.dateAvailabilities?.length > 0
           ? {
               create: packageData.dateAvailabilities.map((da: any) => ({
@@ -245,6 +249,7 @@ export const updateTravelPackage = async (
         videos: true
       }
     });
+
 
     logWithMessageAndStep(
       childLogger,
