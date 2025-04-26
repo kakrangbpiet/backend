@@ -14,7 +14,6 @@ export const createTravelPackage = async (
 ) => {
   const childLogger = (req as any).childLogger as winston.Logger;
   const packageData = req.body;
-
   try {
     logWithMessageAndStep(
       childLogger,
@@ -63,7 +62,9 @@ export const createTravelPackage = async (
             startDate: da.startDate,
             endDate: da.endDate,
             maxTravelers: da.maxTravelers,
-            availableSpots: da.availableSpots
+            availableSpots: da.availableSpots,
+            price: da.price,
+            originalPrice: da.originalPrice
           }))
         } : undefined,
         videos: packageData.videos?.length > 0 ? {
@@ -175,7 +176,6 @@ export const updateTravelPackage = async (
   const childLogger = (req as any).childLogger as winston.Logger;
   const { id } = req.params;
   const packageData = req.body;
-
   try {
     logWithMessageAndStep(
       childLogger,
@@ -226,7 +226,9 @@ export const updateTravelPackage = async (
                 startDate: da.startDate,
                 endDate: da.endDate,
                 maxTravelers: da.maxTravelers,
-                availableSpots: da.availableSpots
+                availableSpots: da.availableSpots,
+                price: da.price,
+                originalPrice: da.originalPrice
               }))
             }
           : undefined,
@@ -785,8 +787,6 @@ export const getAllTitles = async (
       message: "Titles fetched successfully"
     });
   } catch (error) {
-    console.log(error);
-    
     logWithMessageAndStep(childLogger, "Error Step", "Error fetching titles", "getAllTitles", JSON.stringify(error), "error");
     next(error);
   }

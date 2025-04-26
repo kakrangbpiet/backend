@@ -82,6 +82,8 @@ model DateAvailability {
   endDate        Int             // Unix timestamp
   maxTravelers   Int
   availableSpots Int
+  price          Float?
+  originalPrice  Float?
   travelPackage  TravelPackage   @relation(fields: [travelPackageId], references: [id])
   travelPackageId String
 }
