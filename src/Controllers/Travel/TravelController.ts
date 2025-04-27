@@ -108,7 +108,7 @@ export const createTravelPackage = async (
 };
 
 /**
- * Get travel package by ID with date availabilities
+ * Get travel package by ID with optional field selection
  */
 export const getTravelPackageById = async (
   req: Request,
@@ -128,14 +128,65 @@ export const getTravelPackageById = async (
       "info"
     );
 
+    // Get fields to select from query
+    const selectFields = req.query.select as string | undefined;
+    let select: any = undefined;
+
+    if (selectFields) {
+      // If specific fields are requested, build the select object
+      const fields = selectFields.split(',');
+      select = {
+        id: fields.includes('id'),
+        title: fields.includes('title'),
+        description: fields.includes('description'),
+        price: fields.includes('price'),
+        originalPrice: fields.includes('originalPrice'),
+        image: fields.includes('image'),
+        images: fields.includes('images'),
+        location: fields.includes('location'),
+        category: fields.includes('category'),
+        status: fields.includes('status'),
+        maxTravelers: fields.includes('maxTravelers'),
+        availableSpots: fields.includes('availableSpots'),
+        travelType: fields.includes('travelType'),
+        createdAt: fields.includes('createdAt'),
+        updatedAt: fields.includes('updatedAt'),
+        activities: fields.includes('activities'),
+        dateAvailabilities: fields.includes('dateAvailabilities'),
+        videos: fields.includes('videos')
+      };
+
+      // Always include id for reference
+      select.id = true;
+    } else {
+      // If no fields specified, include all fields
+      select = {
+        id: true,
+        title: true,
+        description: true,
+        price: true,
+        originalPrice: true,
+        image: true,
+        images: true,
+        location: true,
+        category: true,
+        status: true,
+        maxTravelers: true,
+        availableSpots: true,
+        travelType: true,
+        createdAt: true,
+        updatedAt: true,
+        activities: true,
+        dateAvailabilities: true,
+        videos: true
+      };
+    }
+
     const travelPackage = await prisma.travelPackage.findUnique({
       where: { id },
-      include: {
-        dateAvailabilities: true,
-      }
+      select
     });
 
-    
     if (!travelPackage) {
       return res.status(404).json({
         error: "Travel package not found"
@@ -709,6 +760,56 @@ export const getVideosByPackageId = async (
       "Error Step",
       "Error fetching videos",
       "getVideosByPackageId",
+      JSON.stringify(error),
+      "error"
+    );
+    next(error);
+  }
+};
+/**
+ * Get dateAvailabilities by travel package ID,
+ */
+export const getDateAvailabilitiesByPackageId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const childLogger = (req as any).childLogger as winston.Logger;
+  const { id } = req.params;
+
+  try {
+    logWithMessageAndStep(
+      childLogger,
+      "Step 1",
+      "Fetching date availabilities for travel package",
+      "getDateAvailabilitiesByPackageId",
+      `ID: ${id}`,
+      "info"
+    );
+    
+    // Get current timestamp in seconds
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    
+    // Fetch date availabilities where startDate is >= current time
+    const dateAvailabilities = await prisma.dateAvailability.findMany({
+      where: { 
+        travelPackageId: id,
+        startDate: {
+          gte: currentTimestamp
+        }
+      }
+    });
+
+    res.status(200).json({
+      data: dateAvailabilities,
+      message: "Date availabilities fetched successfully"
+    });
+  } catch (error) {
+    logWithMessageAndStep(
+      childLogger,
+      "Error Step",
+      "Error fetching date availabilities",
+      "getDateAvailabilitiesByPackageId",
       JSON.stringify(error),
       "error"
     );

@@ -11,7 +11,8 @@ import {
   getVideosByPackageId,
   getAllCategories,
   getAllLocations,
-  getAllTitles
+  getAllTitles,
+  getDateAvailabilitiesByPackageId
 } from "../../Controllers/Travel/TravelController.js";
 import checkJwt from "../../Middleware/checkJwt.js";
 import { UserCategory } from "../../DataTypes/enums/IUserEnums.js";
@@ -430,6 +431,83 @@ router.get("/Travel/titles", getAllTitles);
  *         description: Internal server error
  */
 router.get("/Travel/:id", getTravelPackageById);
+
+/**
+ * @swagger
+ * /Travel/dates/{id}:
+ *   get:
+ *     summary: Get date availabilities for a specific travel package
+ *     description: Returns all date availabilities for the given travel package that have a start date equal to or later than the current time
+ *     tags: [Travel]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Travel package ID
+ *     responses:
+ *       200:
+ *         description: List of available dates for the travel package
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     dateAvailabilities:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/DateAvailability'
+ *                 message:
+ *                   type: string
+ *                   example: "Date availabilities fetched successfully"
+ *       400:
+ *         description: Invalid ID format
+ *       404:
+ *         description: Travel package not found
+ *       500:
+ *         description: Internal server error
+ * 
+ * components:
+ *   schemas:
+ *     DateAvailability:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           description: The unique identifier for the date availability
+ *         startDate:
+ *           type: integer
+ *           format: int64
+ *           description: Unix timestamp for the start date
+ *         endDate:
+ *           type: integer
+ *           format: int64
+ *           description: Unix timestamp for the end date
+ *         maxTravelers:
+ *           type: integer
+ *           description: Maximum number of travelers allowed
+ *         availableSpots:
+ *           type: integer
+ *           description: Number of available spots remaining
+ *         price:
+ *           type: number
+ *           format: float
+ *           nullable: true
+ *           description: Current price
+ *         originalPrice:
+ *           type: number
+ *           format: float
+ *           nullable: true
+ *           description: Original price before any discounts
+ *         travelPackageId:
+ *           type: string
+ *           description: ID of the associated travel package
+ */
+router.get("/Travel/dates/:id", getDateAvailabilitiesByPackageId);
 
 
 export default router;
