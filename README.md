@@ -1,4 +1,3 @@
 # backend
 
-
-npx prisma migrate dev --name add_phoneNumber_unique_constraint
+npx prisma migrate dev --name updated-schema 

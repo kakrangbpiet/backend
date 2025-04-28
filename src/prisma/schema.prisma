@@ -96,8 +96,8 @@ model TravelInquiry {
   destination    String
   address        String?
   passengerCount Int
-  startDate      DateTime?
-  endDate        DateTime?
+  startDate      Int
+  endDate        Int
   tripType       String
   specialRequests String?
   status         String

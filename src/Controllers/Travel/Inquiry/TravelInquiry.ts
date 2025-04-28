@@ -327,7 +327,6 @@ export const updateInquiryStatus = async (
 export const GetPrompt = async (req: Request, res: Response, next: NextFunction) => {
   try {
       const { userMessage, aiType="chatgpt", history } = req.body;
-      console.log(aiType);
 
       // Set response headers for streaming
       res.setHeader("Content-Type", "text/event-stream");
@@ -361,9 +360,6 @@ export const GetPrompt = async (req: Request, res: Response, next: NextFunction)
       //     model: "dall-e-3",
       //     prompt: imagePrompt, // Use the chat output as the image prompt
       // });
-
-      // console.log("creating image");
-      // console.log(imageResponse.data[0]?.url);
 
       // Send the image URL as a separate event
       // res.write(`data: ${JSON.stringify({ image: imageResponse.data[0]?.url })}\n\n`);

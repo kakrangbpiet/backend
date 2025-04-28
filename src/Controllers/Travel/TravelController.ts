@@ -799,7 +799,6 @@ export const getVideosByPackageId = async (
       });
       allVideos = allVideoss || [];
     }
-console.log(allVideos);
 
     res.status(200).json({
       data: {
