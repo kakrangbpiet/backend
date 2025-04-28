@@ -67,7 +67,7 @@ export const createTravelInquiry = async (
         packageTitle: inquiryData.packageTitle,
         destination: inquiryData.destination,
         address: inquiryData.address,
-        passengerCount: inquiryData.passengerCount,
+        passengerCount: Number(inquiryData.passengerCount) ,
         startDate: inquiryData.startDate,
         endDate: inquiryData.endDate,
         tripType: inquiryData.tripType,
