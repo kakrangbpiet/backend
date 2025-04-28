@@ -375,6 +375,73 @@ export const GetPrompt = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
+export const addOrUpdatePaymentInfo = async (
+  req: RequestWithUser,
+  res: Response,
+  next: NextFunction
+) => {
+  const childLogger = (req as any).childLogger as winston.Logger;
+  const { travelInquiryId, paymentInfoData } = req.body;
+
+  try {
+    logWithMessageAndStep(
+      childLogger,
+      "Step 1",
+      "Adding or updating payment info",
+      "addOrUpdatePaymentInfo",
+      JSON.stringify(req.body),
+      "info"
+    );
+
+    let inquiry;
+
+ 
+      // Check if inquiry exists
+      const existingInquiry = await prisma.travelInquiry.findUnique({
+        where: { id: travelInquiryId },
+      });
+
+      if (!existingInquiry) {
+        return res.status(404).json({ error: "Travel Inquiry not found" });
+      }
+
+      const paymentInfo = await prisma.paymentInfo.create({
+        data: {
+          ...paymentInfoData,
+          travelInquiry: {
+            connect: { id: travelInquiryId },
+          },
+        },
+      });
+
+      inquiry = { ...existingInquiry, paymentInfo };
+
+
+    logWithMessageAndStep(
+      childLogger,
+      "Step 2",
+      "Successfully added or updated payment info",
+      "addOrUpdatePaymentInfo",
+      `Inquiry ID: ${inquiry.id}`,
+      "info"
+    );
+
+    res.status(200).json({
+      data: inquiry,
+      message: "Payment info added/updated successfully",
+    });
+  } catch (error) {
+    logWithMessageAndStep(
+      childLogger,
+      "Error Step",
+      "Error adding/updating payment info",
+      "addOrUpdatePaymentInfo",
+      JSON.stringify(error),
+      "error"
+    );
+    next(error);
+  }
+};
 
 // /**
 // * Generate an image prompt for DALL·E based on JSON data

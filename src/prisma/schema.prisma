@@ -90,49 +90,34 @@ model DateAvailability {
 }
 
 model TravelInquiry {
-  id              String   @id @default(uuid())
-  packageId       String
-  packageTitle    String
-  destination     String
-  address         String   @default("")
-  passengerCount  Int
-  startDate       Int?     // Unix timestamp
-  endDate         Int?     // Unix timestamp
-  tripType        String   @default("pre-planned") // "pre-planned" or "custom"
-  specialRequests String   @default("")
-  status          String
-  userId          String?
-  name            String?
-  email           String?
-  phoneNumber     String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  @@map("travel_inquiries")
-}
-
-model TravelBooking {
-  id             String   @id @default(uuid())
-  inquiryId      String   @unique
+  id             String       @id @default(cuid())
   packageId      String
-  userId         String?
+  packageTitle   String
+  destination    String
+  address        String?
   passengerCount Int
-  status         String   @default("confirmed")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  @@map("travel_bookings")
+  startDate      DateTime?
+  endDate        DateTime?
+  tripType       String
+  specialRequests String?
+  status         String
+  userId         String?
+  name           String?
+  email          String?
+  phoneNumber    String?
+  createdAt      DateTime      @default(now())
+  paymentInfo    PaymentInfo?  @relation(fields: [paymentInfoId], references: [id])
+  paymentInfoId  String?       @unique
 }
 
 model PaymentInfo {
-  id            String   @id @default(uuid())
-  bookingId     String   @unique
-  amount        Float
-  status        String   @default("pending")
-  paymentMethod String
-  transactionId String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  @@map("payment_info")
+  id               String      @id @default(cuid())
+  paymentMethod    String
+  amount           Float
+  currency         String
+  status           String      // e.g., 'pending', 'completed', 'failed'
+  transactionId    String?
+  travelInquiry    TravelInquiry? @relation
+  createdAt        DateTime    @default(now())
 }
+
