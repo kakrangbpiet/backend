@@ -12,7 +12,8 @@ import {
   getAllCategories,
   getAllLocations,
   getAllTitles,
-  getDateAvailabilitiesByPackageId
+  getDateAvailabilitiesByPackageId,
+  getRandomVideosByPackageId
 } from "../../Controllers/Travel/TravelController.js";
 import checkJwt from "../../Middleware/checkJwt.js";
 import { UserCategory } from "../../DataTypes/enums/IUserEnums.js";
@@ -283,6 +284,40 @@ router.delete("/Travel/:id",
   checkJwt([UserCategory.SUPER_ADMIN]),
   deleteTravelPackage);
 
+  /**
+ * @swagger
+ * /Travel/randomvideo/{id}:
+ *   get:
+ *     summary: Get a random video for a travel package
+ *     tags: [Travel]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Travel package ID
+ *     responses:
+ *       200:
+ *         description: Random video for the package
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/TravelVideo'
+ *                 message:
+ *                   type: string
+ *                   example: "Videos fetched successfully"
+ *       404:
+ *         description: No videos found
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/Travel/randomvideo/:id", getRandomVideosByPackageId);
   /**
  * @swagger
  * /Travel/videos/{id}:

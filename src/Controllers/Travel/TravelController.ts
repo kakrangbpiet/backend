@@ -711,9 +711,9 @@ export const updateTravelPackageStatus = async (
 
 
 /**
- * Get videos by travel package ID, including array length and a random video
+ * Get a single random video by travel package ID, including array length and a random video
  */
-export const getVideosByPackageId = async (
+export const getRandomVideosByPackageId = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -766,6 +766,61 @@ export const getVideosByPackageId = async (
     next(error);
   }
 };
+/**
+ * Get videos by travel package ID, including array length and a random video
+ */
+export const getVideosByPackageId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const childLogger = (req as any).childLogger as winston.Logger;
+  const { id } = req.params;
+
+  try {
+    logWithMessageAndStep(
+      childLogger,
+      "Step 1",
+      "Fetching videos for travel package",
+      "getVideosByPackageId",
+      `ID: ${id}`,
+      "info"
+    );
+    // Count videos without fetching them
+    const videoCount = await prisma.travelVideo.count({
+      where: { travelPackageId: id }
+    });
+
+    // Fetch one random video if available
+    let allVideos:any = [];
+    if (videoCount > 0) {
+      const allVideoss = await prisma.travelVideo.findMany({
+        where: { travelPackageId: id },
+      });
+      allVideos = allVideoss || [];
+    }
+console.log(allVideos);
+
+    res.status(200).json({
+      data: {
+        videoCount,
+        allVideos
+      },
+      message: "Videos fetched successfully"
+    });
+  } catch (error) {
+    logWithMessageAndStep(
+      childLogger,
+      "Error Step",
+      "Error fetching videos",
+      "getVideosByPackageId",
+      JSON.stringify(error),
+      "error"
+    );
+    next(error);
+  }
+};
+
 /**
  * Get dateAvailabilities by travel package ID,
  */
