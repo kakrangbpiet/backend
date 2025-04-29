@@ -926,7 +926,7 @@ export const getAllLocations = async (
 };
 
 /**
- * Get all distinct titles from travel packages
+ * Get all distinct titles from travel packages with optional status filter
  */
 export const getAllTitles = async (
   req: Request,
@@ -937,7 +937,13 @@ export const getAllTitles = async (
   try {
     logWithMessageAndStep(childLogger, "Step 1", "Fetching all titles", "getAllTitles", "", "info");
 
+    // Get status from query params, default to 'active' if not provided
+    const status = req.query.status as string || 'active';
+
     const titles = await prisma.travelPackage.findMany({
+      where: {
+        status: status
+      },
       distinct: ['title'],
       select: { id: true, title: true },
     });
