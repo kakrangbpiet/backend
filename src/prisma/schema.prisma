@@ -70,7 +70,7 @@ model TravelPackage {
 
 model TravelVideo {
   id           String   @id @default(uuid())
-  base64Data   String   // base64-encoded video string
+  awsUrl   String   // base64-encoded video string
   travelPackageId String
   travelPackage   TravelPackage @relation(fields: [travelPackageId], references: [id])
 

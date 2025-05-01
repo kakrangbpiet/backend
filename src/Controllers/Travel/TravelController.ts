@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import winston from "winston";
 import { prisma } from "../../Utils/db/client.js";
 import { logWithMessageAndStep } from "../../Utils/Logger/logger.js";
+import { uploadFileToS3 } from "../../Projects/Aws/S3Bucket.js";
 
 
 /**
@@ -34,6 +35,50 @@ export const createTravelPackage = async (
       });
     }
 
+    // Upload main image to S3
+    let imageUrl = packageData.image;
+    if (packageData.image.startsWith('data:')) {
+      imageUrl = await uploadFileToS3(
+        packageData.image,
+        `image_${Date.now()}.jpg`,
+        'image/jpeg'
+      ) || packageData.image; // Fallback to original if upload fails
+    }
+
+    // Upload additional images to S3
+    let imagesUrls:string[] = [];
+    if (packageData.images?.length > 0) {
+      for (const img of packageData.images) {
+        if (img.startsWith('data:')) {
+          const url = await uploadFileToS3(
+            img,
+            `image_${Date.now()}.jpg`,
+            'image/jpeg'
+          );
+          if (url) imagesUrls.push(url);
+        } else {
+          imagesUrls.push(img); // Already a URL
+        }
+      }
+    }
+
+    // Upload videos to S3
+    let videoUrls:string[] = [];
+    if (packageData.videos?.length > 0) {
+      for (const video of packageData.videos) {
+        if (video.startsWith('data:')) {
+          const url = await uploadFileToS3(
+            video,
+            `video_${Date.now()}.mp4`,
+            'video/mp4'
+          );
+          if (url) videoUrls.push(url);
+        } else {
+          videoUrls.push(video); // Already a URL
+        }
+      }
+    }
+
     // Calculate totals if date availabilities exist
     let maxTravelers = packageData.maxTravelers || 0;
     let availableSpots = packageData.availableSpots || 0;
@@ -49,8 +94,8 @@ export const createTravelPackage = async (
         description: packageData.description,
         price: packageData.price,
         originalPrice: packageData.originalPrice,
-        image: packageData.image,
-        images: packageData.images || [],
+        image: imageUrl,
+        images: imagesUrls,
         location: packageData.location,
         category: packageData.category,
         status: packageData.status || "active",
@@ -68,12 +113,11 @@ export const createTravelPackage = async (
           }))
         } : undefined,
         activities: packageData.activities || [], 
-        videos: packageData.videos?.length > 0 ? {
-          create: packageData.videos.map((video: any) => ({
-            base64Data: video
+        videos: videoUrls.length > 0 ? {
+          create: videoUrls.map((url: string) => ({
+            awsUrl: url
           }))
         } : undefined,
-        
       },
       include: {
         dateAvailabilities: true,
@@ -106,6 +150,8 @@ export const createTravelPackage = async (
     next(error);
   }
 };
+
+
 
 /**
  * Get travel package by ID with optional field selection
@@ -240,6 +286,50 @@ export const updateTravelPackage = async (
       "info"
     );
 
+    // Upload main image to S3 if it's base64
+    let imageUrl = packageData.image;
+    if (packageData.image.startsWith('data:')) {
+      imageUrl = await uploadFileToS3(
+        packageData.image,
+        `image_${Date.now()}.jpg`,
+        'image/jpeg'
+      ) || packageData.image;
+    }
+
+    // Upload additional images to S3
+    let imagesUrls:string[] = [];
+    if (packageData.images?.length > 0) {
+      for (const img of packageData.images) {
+        if (img.startsWith('data:')) {
+          const url = await uploadFileToS3(
+            img,
+            `image_${Date.now()}.jpg`,
+            'image/jpeg'
+          );
+          if (url) imagesUrls.push(url);
+        } else {
+          imagesUrls.push(img);
+        }
+      }
+    }
+
+    // Upload videos to S3
+    let videoUrls:string[] = [];
+    if (packageData.videos?.length > 0) {
+      for (const video of packageData.videos) {
+        if (video.startsWith('data:')) {
+          const url = await uploadFileToS3(
+            video,
+            `video_${Date.now()}.mp4`,
+            'video/mp4'
+          );
+          if (url) videoUrls.push(url);
+        } else {
+          videoUrls.push(video);
+        }
+      }
+    }
+
     // Delete existing date availabilities
     await prisma.dateAvailability.deleteMany({
       where: { travelPackageId: id }
@@ -266,8 +356,8 @@ export const updateTravelPackage = async (
         description: packageData.description,
         price: packageData.price,
         originalPrice: packageData.originalPrice,
-        image: packageData.image,
-        images: packageData.images || [],
+        image: imageUrl,
+        images: imagesUrls,
         location: packageData.location,
         category: packageData.category,
         status: packageData.status || "active",
@@ -287,10 +377,10 @@ export const updateTravelPackage = async (
               }))
             }
           : undefined,
-        videos: packageData.videos?.length > 0
+        videos: videoUrls.length > 0
           ? {
-              create: packageData.videos.map((video: any) => ({
-                base64Data: video
+              create: videoUrls.map((url: string) => ({
+                awsUrl: url
               }))
             }
           : undefined
@@ -300,7 +390,6 @@ export const updateTravelPackage = async (
         videos: true
       }
     });
-
 
     logWithMessageAndStep(
       childLogger,

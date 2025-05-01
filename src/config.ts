@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import 'dotenv/config'
+import AWS from "aws-sdk";
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
@@ -45,3 +46,9 @@ export default {
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     WEBSITE_URL: process.env.WEBSITE_URL,
 };
+
+export const s3 = new AWS.S3({
+    accessKeyId: process.env.AWS_ACCESS_KEY!,
+    secretAccessKey: process.env.AWS_SECRET_KEY!,
+    region: process.env.AWS_REGION!,
+  });
