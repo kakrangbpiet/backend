@@ -1,11 +1,11 @@
 import OpenAI from "openai";
 import config from "../../../config.js";
 
-const openai = new OpenAI({ apiKey: config.openAiApiKey });
+const openai = new OpenAI({ apiKey: config.OPENAI_API_KEY });
 
 export const chatWithGPT = async function* (userMessage: string, history: any[]): AsyncGenerator<string, void, unknown> {
     try {
-        if (!config.openAiApiKey) {
+        if (!config.OPENAI_API_KEY) {
             throw new Error("Missing OpenAI API Key. Please set OPENAI_API_KEY in your environment variables.");
         }
 

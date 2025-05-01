@@ -148,3 +148,92 @@ export const CommonError = {
         details: ""
     })
 };
+
+
+export const TwilioError = {
+    MissingCredentials: (): ErrorObject => ({
+        statusCode: 500,
+        message: "Twilio credentials not configured",
+        details: "TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN are required"
+    }),
+    MissingServiceSid: (): ErrorObject => ({
+        statusCode: 500,
+        message: "Twilio Verify Service SID not configured",
+        details: "TWILIO_VERIFY_SERVICE_SID is required"
+    }),
+    MissingFromNumber: (): ErrorObject => ({
+        statusCode: 500,
+        message: "Twilio From Number not configured",
+        details: "TWILIO_FROM_NUMBER is required"
+    }),
+    InitializationError: (error: unknown): ErrorObject => ({
+        statusCode: 500,
+        message: "Twilio service initialization failed",
+        details: error
+    }),
+    InvalidPhoneNumber: (): ErrorObject => ({
+        statusCode: 400,
+        message: "Invalid phone number",
+        details: "The provided phone number is not valid"
+    }),
+    InvalidOtp: (): ErrorObject => ({
+        statusCode: 400,
+        message: "Invalid OTP",
+        details: "The provided OTP is not valid"
+    }),
+    OtpVerificationFailed: (): ErrorObject => ({
+        statusCode: 400,
+        message: "OTP verification failed",
+        details: "The OTP could not be verified"
+    }),
+    SendOtpError: (error: unknown): ErrorObject => ({
+        statusCode: 500,
+        message: "Failed to send OTP",
+        details: error
+    }),
+    VerificationError: (error: unknown): ErrorObject => ({
+        statusCode: 500,
+        message: "OTP verification error",
+        details: error
+    }),
+    SmsSendError: (error: unknown): ErrorObject => ({
+        statusCode: 500,
+        message: "Failed to send SMS",
+        details: error
+    }),
+    ServiceNotFound: (serviceSid: string): ErrorObject => ({
+        statusCode: 500,
+        message: "Twilio Verify Service not found",
+        details: `Service SID: ${serviceSid}`
+    }),
+    MaxAttemptsReached: (): ErrorObject => ({
+        statusCode: 500,
+        message: "Max OTP attempts reached",
+        details: "Too many OTP attempts, please try again later"
+    }),
+    InvalidVerificationParams: (): ErrorObject => ({
+        statusCode: 400,
+        message: "Invalid verification parameters",
+        details: "Phone number and OTP are required"
+    }),
+    InvalidResendParams: (): ErrorObject => ({
+        statusCode: 400,
+        message: "Invalid resend parameters",
+        details: "Phone number and transaction ID are required"
+    }),
+    ResendOtpError: (error: unknown): ErrorObject => ({
+        statusCode: 500,
+        message: "Failed to resend OTP",
+        details: error
+    }),
+    UnverifiedNumber: (): ErrorObject => ({
+        statusCode: 400,
+        message: "Unverified phone number",
+        details: "This number is not verified for SMS sending"
+    }),
+    OtpExpired: (): ErrorObject => ({
+        statusCode: 400,
+        message: "OTP expired",
+        details: "The OTP has expired, please request a new one"
+    }),
+};

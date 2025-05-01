@@ -9,6 +9,7 @@ import { IUser } from "../../DataTypes/Interfaces/IUser.js";
 import { PasswordLessUserValidation } from "../../Validation/UserValidation.js";
 import { generateTokens, refreshAccessToken } from "../../Utils/scripts/jwtToken.js";
 import { Prisma } from "@prisma/client";
+import { twilioOtpService } from "../../externalApis/twilioOtpService.js";
 
 /**
  * add new user
@@ -196,7 +197,7 @@ export const verifyOtpLogin = async (
         );
 
         // Verify OTP
-        const verifyOtpData = { otp, trxId, deviceId };
+        const verifyOtpData = { otp, trxId, deviceId,phoneNumber };
         const otpVerified = await mockVerifyOtpRequest(verifyOtpData);
 
         if (!otpVerified) {
@@ -352,24 +353,23 @@ export const refreshLoginToken = async (
 
 const mockSendOtpRequest = async (otpData: any) => {
     // Simulate a delay for async behavior
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    // Simulated response
-    const mockResponse = {
-        status: "success",
-        trxId: `trx_${Math.random().toString(36).substr(2, 9)}`,
-        message: "OTP sent successfully",
-    };
-
-    return mockResponse;
+    try {
+        const { trxId } = await twilioOtpService.sendLoginOtp(otpData.phoneNumber);
+        return {
+            status: "success",
+            trxId,
+            message: "OTP sent successfully",
+        };
+    } catch (error) {
+        console.error("OTP sending failed:", error);
+        throw new Error("Failed to send OTP");
+    }
 };
 
 const mockVerifyOtpRequest = async (verifyOtpData: any) => {
     // Simulate a delay for async behavior
-    await new Promise((resolve) => setTimeout(resolve, 500));
 
-    // Simulated verification success/failure
-    const isSuccess = true
+    const isSuccess = await twilioOtpService.verifyLoginOtp(verifyOtpData.phoneNumber,verifyOtpData.otp );
 
     if (isSuccess) {
         return {
