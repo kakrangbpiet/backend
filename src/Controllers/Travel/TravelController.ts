@@ -272,50 +272,12 @@ export const updateTravelPackage = async (
       "info"
     );
 
-    // Upload main image to S3 if it's base64
-    let imageUrl = packageData.image;
-      imageUrl = await uploadFileToS3(
-        packageData.image,
-        `image_${Date.now()}.jpg`,
-        'image/jpeg'
-      ) || packageData.image;
-
-    // Upload additional images to S3
-    let imagesUrls:string[] = [];
-    if (packageData.images?.length > 0) {
-      for (const img of packageData.images) {
-          const url = await uploadFileToS3(
-            img,
-            `image_${Date.now()}.jpg`,
-            'image/jpeg'
-          );
-          if (url) imagesUrls.push(url);
-      }
-    }
-
-    // Upload videos to S3
-    let videoUrls:string[] = [];
-    if (packageData.videos?.length > 0) {
-      for (const video of packageData.videos) {
-          const url = await uploadFileToS3(
-            video,
-            `video_${Date.now()}.mp4`,
-            'video/mp4'
-          );
-          if (url) videoUrls.push(url);
-      
-      }
-    }
 
     // Delete existing date availabilities
     await prisma.dateAvailability.deleteMany({
       where: { travelPackageId: id }
     });
 
-    // Delete existing videos
-    await prisma.travelVideo.deleteMany({
-      where: { travelPackageId: id }
-    });
 
     // Calculate totals
     let maxTravelers = packageData.maxTravelers || 0;
@@ -331,8 +293,6 @@ export const updateTravelPackage = async (
       data: {
         title: packageData.title,
         description: packageData.description,
-        image: imageUrl,
-        images: imagesUrls,
         location: packageData.location,
         category: packageData.category,
         status: packageData.status || "active",
@@ -352,17 +312,9 @@ export const updateTravelPackage = async (
               }))
             }
           : undefined,
-        videos: videoUrls.length > 0
-          ? {
-              create: videoUrls.map((url: string) => ({
-                awsUrl: url
-              }))
-            }
-          : undefined
       },
       include: {
         dateAvailabilities: true,
-        videos: true
       }
     });
 
