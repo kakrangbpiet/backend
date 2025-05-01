@@ -82,6 +82,8 @@ class TwilioOtpService {
             if (!phoneNumber || !otp) {
                 throw TwilioError.InvalidVerificationParams();
             }
+            console.log(phoneNumber,otp);
+            
 
             const formattedNumber = `+91${phoneNumber}`;
             
@@ -103,7 +105,7 @@ class TwilioOtpService {
             } else if (error.code === 20404) {
                 throw TwilioError.ServiceNotFound(this.serviceSid);
             } else if (error.code === 60200) {
-                throw TwilioError.InvalidPhoneNumber();
+                throw TwilioError.InvalidOtp();
             }
             console.log("error",error);
             
