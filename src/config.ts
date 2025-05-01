@@ -43,4 +43,5 @@ export default {
     
     // OpenAI
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    WEBSITE_URL: process.env.WEBSITE_URL,
 };

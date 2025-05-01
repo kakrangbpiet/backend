@@ -4,6 +4,7 @@ import { prisma } from "../../../Utils/db/client.js";
 import { logWithMessageAndStep } from "../../../Utils/Logger/logger.js";
 import { RequestWithUser } from "../../../Middleware/checkJwt.js";
 import { chatWithGPT } from "../../../Projects/AI/Chatgpt/Chatgpt.js";
+import { sendInquiryToWhatsApp } from "../../../externalApis/whatsappSender.js";
 
 /**
  * Create a new travel inquiry
@@ -88,6 +89,8 @@ export const createTravelInquiry = async (
       `Created inquiry with ID: ${newInquiry.id}`,
       "info"
     );
+
+    sendInquiryToWhatsApp(newInquiry, childLogger);
 
     res.status(201).json({
       data: newInquiry,
@@ -248,9 +251,6 @@ export const getInquiryDetails = async (
     next(error);
   }
 };
-
-
-
 
 // Update status values in updateInquiryStatus
 export const updateInquiryStatus = async (
@@ -432,6 +432,81 @@ export const addOrUpdatePaymentInfo = async (
       "Error Step",
       "Error adding/updating payment info",
       "addOrUpdatePaymentInfo",
+      JSON.stringify(error),
+      "error"
+    );
+    next(error);
+  }
+};
+
+/**
+ * Get all travel inquiries (for admin purposes)
+ */
+export const getAllInquiries = async (
+  req: RequestWithUser,
+  res: Response,
+  next: NextFunction
+) => {
+  const childLogger = (req as any).childLogger as winston.Logger;
+
+  try {
+    logWithMessageAndStep(
+      childLogger,
+      "Step 1",
+      "Fetching all travel inquiries",
+      "getAllInquiries",
+      "Fetching all inquiries",
+      "info"
+    );
+
+    const inquiries = await prisma.travelInquiry.findMany({
+      orderBy: {
+        createdAt: "desc"
+      },
+      select: {
+        id: true,
+        packageId: true,
+        packageTitle: true,
+        destination: true,
+        address: true,
+        passengerCount: true,
+        startDate: true,
+        endDate: true,
+        tripType: true,
+        specialRequests: true,
+        status: true,
+        createdAt: true,
+        name: true,
+        email: true,
+        phoneNumber: true,
+        paymentInfo: {
+          select: {
+            id: true,
+            status: true,
+          }
+        }
+      }
+    });
+
+    logWithMessageAndStep(
+      childLogger,
+      "Step 2",
+      "Successfully fetched all inquiries",
+      "getAllInquiries",
+      `Found ${inquiries.length} inquiries`,
+      "info"
+    );
+
+    res.status(200).json({
+      data: inquiries,
+      message: "All inquiries fetched successfully"
+    });
+  } catch (error) {
+    logWithMessageAndStep(
+      childLogger,
+      "Error Step",
+      "Error fetching all inquiries",
+      "getAllInquiries",
       JSON.stringify(error),
       "error"
     );
