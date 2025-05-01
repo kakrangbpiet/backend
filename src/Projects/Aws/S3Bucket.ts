@@ -12,7 +12,7 @@ export const uploadFileToS3 = async (base64Data: string, fileName: string, mimeT
       
       const params: AWS.S3.PutObjectRequest = {
         Bucket: process.env.S3_BUCKET_NAME!,
-        Key: `uploads/${Date.now()}_${fileName}`,
+        Key: `samsara/${Date.now()}_${fileName}`,
         Body: fileBuffer,
         ContentType: mimeType,
         ACL: "public-read", // Ensure public access if needed
