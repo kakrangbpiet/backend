@@ -45,8 +45,6 @@ model TravelPackage {
   id             String   @id @default(uuid())
   title          String
   description    String
-  price          Float
-  originalPrice  Float?
   image          String
   images         String[]
   location       String

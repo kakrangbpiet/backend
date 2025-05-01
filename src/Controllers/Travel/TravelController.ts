@@ -26,7 +26,7 @@ export const createTravelPackage = async (
     );
 
     // Validate required fields
-    const requiredFields = ['title', 'description', 'price', 'location', 'category', 'image'];
+    const requiredFields = ['title', 'description',  'location', 'category', 'image'];
     const missingFields = requiredFields.filter(field => !packageData[field]);
 
     if (missingFields.length > 0) {
@@ -37,28 +37,23 @@ export const createTravelPackage = async (
 
     // Upload main image to S3
     let imageUrl = packageData.image;
-    if (packageData.image.startsWith('data:')) {
       imageUrl = await uploadFileToS3(
         packageData.image,
         `image_${Date.now()}.jpg`,
         'image/jpeg'
       ) || packageData.image; // Fallback to original if upload fails
-    }
 
     // Upload additional images to S3
     let imagesUrls:string[] = [];
     if (packageData.images?.length > 0) {
       for (const img of packageData.images) {
-        if (img.startsWith('data:')) {
           const url = await uploadFileToS3(
             img,
             `image_${Date.now()}.jpg`,
             'image/jpeg'
           );
           if (url) imagesUrls.push(url);
-        } else {
-          imagesUrls.push(img); // Already a URL
-        }
+      
       }
     }
 
@@ -66,16 +61,13 @@ export const createTravelPackage = async (
     let videoUrls:string[] = [];
     if (packageData.videos?.length > 0) {
       for (const video of packageData.videos) {
-        if (video.startsWith('data:')) {
           const url = await uploadFileToS3(
             video,
             `video_${Date.now()}.mp4`,
             'video/mp4'
           );
           if (url) videoUrls.push(url);
-        } else {
-          videoUrls.push(video); // Already a URL
-        }
+      
       }
     }
 
@@ -92,8 +84,6 @@ export const createTravelPackage = async (
       data: {
         title: packageData.title,
         description: packageData.description,
-        price: packageData.price,
-        originalPrice: packageData.originalPrice,
         image: imageUrl,
         images: imagesUrls,
         location: packageData.location,
@@ -185,8 +175,6 @@ export const getTravelPackageById = async (
         id: fields.includes('id'),
         title: fields.includes('title'),
         description: fields.includes('description'),
-        price: fields.includes('price'),
-        originalPrice: fields.includes('originalPrice'),
         image: fields.includes('image'),
         images: fields.includes('images'),
         location: fields.includes('location'),
@@ -210,8 +198,6 @@ export const getTravelPackageById = async (
         id: true,
         title: true,
         description: true,
-        price: true,
-        originalPrice: true,
         image: true,
         images: true,
         location: true,
@@ -288,28 +274,22 @@ export const updateTravelPackage = async (
 
     // Upload main image to S3 if it's base64
     let imageUrl = packageData.image;
-    if (packageData.image.startsWith('data:')) {
       imageUrl = await uploadFileToS3(
         packageData.image,
         `image_${Date.now()}.jpg`,
         'image/jpeg'
       ) || packageData.image;
-    }
 
     // Upload additional images to S3
     let imagesUrls:string[] = [];
     if (packageData.images?.length > 0) {
       for (const img of packageData.images) {
-        if (img.startsWith('data:')) {
           const url = await uploadFileToS3(
             img,
             `image_${Date.now()}.jpg`,
             'image/jpeg'
           );
           if (url) imagesUrls.push(url);
-        } else {
-          imagesUrls.push(img);
-        }
       }
     }
 
@@ -317,16 +297,13 @@ export const updateTravelPackage = async (
     let videoUrls:string[] = [];
     if (packageData.videos?.length > 0) {
       for (const video of packageData.videos) {
-        if (video.startsWith('data:')) {
           const url = await uploadFileToS3(
             video,
             `video_${Date.now()}.mp4`,
             'video/mp4'
           );
           if (url) videoUrls.push(url);
-        } else {
-          videoUrls.push(video);
-        }
+      
       }
     }
 
@@ -354,8 +331,6 @@ export const updateTravelPackage = async (
       data: {
         title: packageData.title,
         description: packageData.description,
-        price: packageData.price,
-        originalPrice: packageData.originalPrice,
         image: imageUrl,
         images: imagesUrls,
         location: packageData.location,
@@ -459,8 +434,6 @@ export const getAllTravelPackages = async (
         id: fields.includes('id'),
         title: fields.includes('title'),
         description: fields.includes('description'),
-        price: fields.includes('price'),
-        originalPrice: fields.includes('originalPrice'),
         image: fields.includes('image'),
         location: fields.includes('location'),
         category: fields.includes('category'),
@@ -481,8 +454,6 @@ export const getAllTravelPackages = async (
         id: true,
         title: true,
         description: true,
-        price: true,
-        originalPrice: true,
         image: true,
         location: true,
         category: true,

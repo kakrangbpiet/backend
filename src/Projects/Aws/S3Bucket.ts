@@ -19,9 +19,10 @@ export const uploadFileToS3 = async (base64Data: string, fileName: string, mimeT
       };
   
       const data = await s3.upload(params).promise();
+      
       return data.Location; // The AWS S3 file URL
     } catch (error) {
       console.error("Upload failed:", error);
-      return null;
+      throw new Error("Failed to upload file to S3");
     }
   };
