@@ -970,3 +970,228 @@ export const getAllTitles = async (
   }
 };
 
+
+
+/**
+ * Update travel package main image
+ */
+export const updateTravelPackageImage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const childLogger = (req as any).childLogger as winston.Logger;
+  const { id } = req.params;
+  const { image } = req.body;
+
+  try {
+    logWithMessageAndStep(
+      childLogger,
+      "Step 1",
+      "Updating travel package main image",
+      "updateTravelPackageImage",
+      `ID: ${id}`,
+      "info"
+    );
+
+    if (!image) {
+      return res.status(400).json({
+        error: "Image is required in request body"
+      });
+    }
+
+    // Upload new image to S3
+    let imageUrl = image;
+      imageUrl = await uploadFileToS3(
+        image,
+        `image_${Date.now()}.jpg`,
+        'image/jpeg'
+      ) || image; // Fallback to original if upload fails
+
+    const updatedPackage = await prisma.travelPackage.update({
+      where: { id },
+      data: { image: imageUrl }
+    });
+
+    logWithMessageAndStep(
+      childLogger,
+      "Step 2",
+      "Successfully updated travel package main image",
+      "updateTravelPackageImage",
+      `Updated package ID: ${id}`,
+      "info"
+    );
+
+    res.status(200).json({
+      data: updatedPackage,
+      message: "Travel package main image updated successfully"
+    });
+  } catch (error) {
+    logWithMessageAndStep(
+      childLogger,
+      "Error Step",
+      "Error updating travel package main image",
+      "updateTravelPackageImage",
+      JSON.stringify(error),
+      "error"
+    );
+    next(error);
+  }
+};
+
+/**
+ * Update travel package additional images
+ */
+export const updateTravelPackageImages = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const childLogger = (req as any).childLogger as winston.Logger;
+  const { id } = req.params;
+  const { images } = req.body;
+
+  try {
+    logWithMessageAndStep(
+      childLogger,
+      "Step 1",
+      "Updating travel package additional images",
+      "updateTravelPackageImages",
+      `ID: ${id}`,
+      "info"
+    );
+
+    if (!images || !Array.isArray(images)) {
+      return res.status(400).json({
+        error: "Images array is required in request body"
+      });
+    }
+
+    // Upload new images to S3
+    let imagesUrls: string[] = [];
+    for (const img of images) {
+        const url = await uploadFileToS3(
+          img,
+          `image_${Date.now()}.jpg`,
+          'image/jpeg'
+        );
+        if (url) imagesUrls.push(url);
+   
+    }
+
+    const updatedPackage = await prisma.travelPackage.update({
+      where: { id },
+      data: { images: imagesUrls }
+    });
+
+    logWithMessageAndStep(
+      childLogger,
+      "Step 2",
+      "Successfully updated travel package additional images",
+      "updateTravelPackageImages",
+      `Updated package ID: ${id}`,
+      "info"
+    );
+
+    res.status(200).json({
+      data: updatedPackage,
+      message: "Travel package additional images updated successfully"
+    });
+  } catch (error) {
+    logWithMessageAndStep(
+      childLogger,
+      "Error Step",
+      "Error updating travel package additional images",
+      "updateTravelPackageImages",
+      JSON.stringify(error),
+      "error"
+    );
+    next(error);
+  }
+};
+
+/**
+ * Update travel package videos
+ */
+export const updateTravelPackageVideos = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const childLogger = (req as any).childLogger as winston.Logger;
+  const { id } = req.params;
+  const { videos } = req.body;
+
+  try {
+    logWithMessageAndStep(
+      childLogger,
+      "Step 1",
+      "Updating travel package videos",
+      "updateTravelPackageVideos",
+      `ID: ${id}`,
+      "info"
+    );
+
+    if (!videos || !Array.isArray(videos)) {
+      return res.status(400).json({
+        error: "Videos array is required in request body"
+      });
+    }
+
+    // First delete existing videos
+    await prisma.travelVideo.deleteMany({
+      where: { travelPackageId: id }
+    });
+
+    // Upload new videos to S3 and create records
+    let videoUrls: string[] = [];
+    for (const video of videos) {
+        const url = await uploadFileToS3(
+          video,
+          `video_${Date.now()}.mp4`,
+          'video/mp4'
+        );
+        if (url) videoUrls.push(url);
+    }
+
+    // Create new video records
+    if (videoUrls.length > 0) {
+      await prisma.travelVideo.createMany({
+        data: videoUrls.map(url => ({
+          awsUrl: url,
+          travelPackageId: id
+        }))
+      });
+    }
+
+    // Get updated package with videos
+    const updatedPackage = await prisma.travelPackage.findUnique({
+      where: { id },
+      include: { videos: true }
+    });
+
+    logWithMessageAndStep(
+      childLogger,
+      "Step 2",
+      "Successfully updated travel package videos",
+      "updateTravelPackageVideos",
+      `Updated package ID: ${id}`,
+      "info"
+    );
+
+    res.status(200).json({
+      data: updatedPackage,
+      message: "Travel package videos updated successfully"
+    });
+  } catch (error) {
+    logWithMessageAndStep(
+      childLogger,
+      "Error Step",
+      "Error updating travel package videos",
+      "updateTravelPackageVideos",
+      JSON.stringify(error),
+      "error"
+    );
+    next(error);
+  }
+};

@@ -13,7 +13,10 @@ import {
   getAllLocations,
   getAllTitles,
   getDateAvailabilitiesByPackageId,
-  getRandomVideosByPackageId
+  getRandomVideosByPackageId,
+  updateTravelPackageVideos,
+  updateTravelPackageImages,
+  updateTravelPackageImage
 } from "../../Controllers/Travel/TravelController.js";
 import checkJwt from "../../Middleware/checkJwt.js";
 import { UserCategory } from "../../DataTypes/enums/IUserEnums.js";
@@ -544,5 +547,166 @@ router.get("/Travel/:id", getTravelPackageById);
  */
 router.get("/Travel/dates/:id", getDateAvailabilitiesByPackageId);
 
+
+
+/**
+ * @swagger
+ * /Travel/image/{id}:
+ *   patch:
+ *     summary: Update travel package main image
+ *     tags: [Travel]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Travel package ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               image:
+ *                 type: string
+ *                 description: Base64 encoded image or URL
+ *                 example: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ..."
+ *     responses:
+ *       200:
+ *         description: Travel package main image updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   $ref: '#/components/schemas/TravelPackage'
+ *                 message:
+ *                   type: string
+ *                   example: "Travel package main image updated successfully"
+ *       400:
+ *         description: Bad request - image is required
+ *       401:
+ *         description: Unauthorized - authentication required
+ *       404:
+ *         description: Travel package not found
+ *       500:
+ *         description: Internal server error
+ */
+router.patch("/Travel/image/:id",
+  checkJwt([UserCategory.SUPER_ADMIN]),
+  updateTravelPackageImage);
+
+/**
+ * @swagger
+ * /Travel/images/{id}:
+ *   patch:
+ *     summary: Update travel package additional images
+ *     tags: [Travel]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Travel package ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               images:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Array of base64 encoded images or URLs
+ *                 example: ["data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...", "https://example.com/image.jpg"]
+ *     responses:
+ *       200:
+ *         description: Travel package additional images updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   $ref: '#/components/schemas/TravelPackage'
+ *                 message:
+ *                   type: string
+ *                   example: "Travel package additional images updated successfully"
+ *       400:
+ *         description: Bad request - images array is required
+ *       401:
+ *         description: Unauthorized - authentication required
+ *       404:
+ *         description: Travel package not found
+ *       500:
+ *         description: Internal server error
+ */
+router.patch("/Travel/images/:id",
+  checkJwt([UserCategory.SUPER_ADMIN]),
+  updateTravelPackageImages);
+
+/**
+ * @swagger
+ * /Travel/videos/{id}:
+ *   patch:
+ *     summary: Update travel package videos
+ *     tags: [Travel]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Travel package ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               videos:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Array of base64 encoded videos or URLs
+ *                 example: ["data:video/mp4;base64,AAAAGGZ0eXBtcDQy...", "https://example.com/video.mp4"]
+ *     responses:
+ *       200:
+ *         description: Travel package videos updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   $ref: '#/components/schemas/TravelPackage'
+ *                 message:
+ *                   type: string
+ *                   example: "Travel package videos updated successfully"
+ *       400:
+ *         description: Bad request - videos array is required
+ *       401:
+ *         description: Unauthorized - authentication required
+ *       404:
+ *         description: Travel package not found
+ *       500:
+ *         description: Internal server error
+ */
+router.patch("/Travel/videos/:id",
+  checkJwt([UserCategory.SUPER_ADMIN]),
+  updateTravelPackageVideos);
 
 export default router;
