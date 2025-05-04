@@ -1000,13 +1000,15 @@ export const updateTravelPackageImage = async (
       });
     }
 
-    // Upload new image to S3
+    // Upload new image to S3 only if it's a base64 string
     let imageUrl = image;
+    if (image.startsWith('data:')) {
       imageUrl = await uploadFileToS3(
         image,
         `image_${Date.now()}.jpg`,
         'image/jpeg'
       ) || image; // Fallback to original if upload fails
+    }
 
     const updatedPackage = await prisma.travelPackage.update({
       where: { id },
@@ -1067,16 +1069,20 @@ export const updateTravelPackageImages = async (
       });
     }
 
-    // Upload new images to S3
+    // Upload new images to S3 only if they're base64 strings
     let imagesUrls: string[] = [];
     for (const img of images) {
+      if (img.startsWith('data:')) {
         const url = await uploadFileToS3(
           img,
           `image_${Date.now()}.jpg`,
           'image/jpeg'
         );
         if (url) imagesUrls.push(url);
-   
+      } else {
+        // Keep existing AWS URLs as they are
+        imagesUrls.push(img);
+      }
     }
 
     const updatedPackage = await prisma.travelPackage.update({
@@ -1138,26 +1144,54 @@ export const updateTravelPackageVideos = async (
       });
     }
 
-    // First delete existing videos
-    await prisma.travelVideo.deleteMany({
+    // Get existing videos
+    const existingVideos = await prisma.travelVideo.findMany({
       where: { travelPackageId: id }
     });
 
-    // Upload new videos to S3 and create records
-    let videoUrls: string[] = [];
-    for (const video of videos) {
-        const url = await uploadFileToS3(
-          video,
-          `video_${Date.now()}.mp4`,
-          'video/mp4'
-        );
-        if (url) videoUrls.push(url);
+    // Separate new videos (base64) from existing URLs
+    const newVideos: string[] = [];
+    const existingUrls: string[] = [];
+    
+    videos.forEach(video => {
+      if (video.startsWith('data:')) {
+        newVideos.push(video);
+      } else {
+        existingUrls.push(video);
+      }
+    });
+
+    // Find videos to delete (exist in DB but not in the new list)
+    const videosToDelete = existingVideos.filter(
+      video => !existingUrls.includes(video.awsUrl)
+    );
+
+    // Delete removed videos
+    if (videosToDelete.length > 0) {
+      await prisma.travelVideo.deleteMany({
+        where: {
+          id: {
+            in: videosToDelete.map(v => v.id)
+          }
+        }
+      });
     }
 
-    // Create new video records
-    if (videoUrls.length > 0) {
+    // Upload new videos
+    const uploadedUrls: string[] = [];
+    for (const video of newVideos) {
+      const url = await uploadFileToS3(
+        video,
+        `video_${Date.now()}.mp4`,
+        'video/mp4'
+      );
+      if (url) uploadedUrls.push(url);
+    }
+
+    // Create records for new videos
+    if (uploadedUrls.length > 0) {
       await prisma.travelVideo.createMany({
-        data: videoUrls.map(url => ({
+        data: uploadedUrls.map(url => ({
           awsUrl: url,
           travelPackageId: id
         }))
