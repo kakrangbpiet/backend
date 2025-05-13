@@ -16,7 +16,8 @@ import {
   getRandomVideosByPackageId,
   updateTravelPackageVideos,
   updateTravelPackageImages,
-  updateTravelPackageImage
+  updateTravelPackageImage,
+  uploadVideosToRandomTravelVideos
 } from "../../Controllers/Travel/TravelController.js";
 import checkJwt from "../../Middleware/checkJwt.js";
 import { UserCategory } from "../../DataTypes/enums/IUserEnums.js";
@@ -708,5 +709,52 @@ router.patch("/Travel/images/:id",
 router.patch("/Travel/videos/:id",
   checkJwt([UserCategory.SUPER_ADMIN]),
   updateTravelPackageVideos);
+
+
+  /**
+ * @swagger
+ * /Travel/randomTravelVideos:
+ *   post:
+ *     summary: Upload a video to randomTravelVideos folder in S3
+ *     tags: [Travel]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               video:
+ *                 type: string
+ *                 description: Base64 encoded video data
+ *                 example: "data:video/mp4;base64,AAAAGGZ0eXBtcDQy..."
+ *     responses:
+ *       201:
+ *         description: Video uploaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     videoUrl:
+ *                       type: string
+ *                       description: URL of the uploaded video
+ *                 message:
+ *                   type: string
+ *                   example: "Video uploaded to randomTravelVideos successfully"
+ *       400:
+ *         description: Bad request - video is required
+ *       401:
+ *         description: Unauthorized - authentication required
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/Travel/randomTravelVideos",
+  uploadVideosToRandomTravelVideos);
 
 export default router;

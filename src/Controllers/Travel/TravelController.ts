@@ -3,6 +3,10 @@ import winston from "winston";
 import { prisma } from "../../Utils/db/client.js";
 import { logWithMessageAndStep } from "../../Utils/Logger/logger.js";
 import { uploadFileToS3 } from "../../Projects/Aws/S3Bucket.js";
+import { s3 } from "../../config.js";
+import multer from 'multer';
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 
 /**
@@ -1229,3 +1233,92 @@ export const updateTravelPackageVideos = async (
     next(error);
   }
 };
+
+
+
+
+/**
+ * Upload multiple videos to randomTravelVideos folder in S3
+ */
+export const uploadVideosToRandomTravelVideos = [
+  upload.array('videos'), // Multer middleware to process files
+  async (
+  req: any,
+  res: Response,
+  next: NextFunction
+) => {
+  const childLogger = (req as any).childLogger as winston.Logger;
+
+  try {
+    logWithMessageAndStep(
+      childLogger,
+      "Step 1",
+      "Uploading videos to randomTravelVideos",
+      "uploadVideosToRandomTravelVideos",
+      "Processing video uploads",
+      "info"
+    );
+
+    if (!req.files || !Array.isArray(req.files)) {
+      return res.status(400).json({
+        error: "Videos array is required in request"
+      });
+    }
+
+    const files = req.files as any;
+    
+    if (files.length === 0) {
+      return res.status(400).json({
+        error: "Videos array cannot be empty"
+      });
+    }
+
+    const uploadResults = await Promise.all(
+      files.map(async (file, index) => {
+        try {
+          const fileName = `video_${Date.now()}_${index}.mp4`;
+          const mimeType = file.mimetype;
+
+          const params: AWS.S3.PutObjectRequest = {
+            Bucket: process.env.S3_BUCKET_NAME!,
+            Key: `randomTravelVideos/${fileName}`,
+            Body: file.buffer,
+            ContentType: mimeType,
+            ACL: "public-read",
+          };
+
+          const uploadResult = await s3.upload(params).promise();
+          return {
+            success: true,
+            url: uploadResult.Location,
+            fileName: fileName
+          };
+        } catch (error) {
+          return {
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
+            index: index
+          };
+        }
+      })
+    );
+
+    res.status(201).json({
+      data: {
+        uploadResults
+      },
+      message: `Successfully uploaded videos`
+    });
+  } catch (error) {
+    logWithMessageAndStep(
+      childLogger,
+      "Error Step",
+      "Error uploading videos to randomTravelVideos",
+      "uploadVideosToRandomTravelVideos",
+      JSON.stringify(error),
+      "error"
+    );
+    next(error);
+  }
+}
+]
