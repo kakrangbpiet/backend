@@ -1,6 +1,7 @@
 
 export enum UserCategory {
     User = 'user',
+    GYS_USER = 'GYS_USER',
     SUPER_ADMIN = 'SAMSARA_SUPER_ADMIN',
 }
 
