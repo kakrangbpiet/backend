@@ -8,6 +8,7 @@ import SuperAdmin from "./SystemAdmin/SystemAdminRoutes.js"
 import TravelRoutes from "./Travel/TravelRoutes.js";
 import LoginRoutes from "./Authentication/LoginRoutes.js";
 import TraverInquiryRoutes from "./Travel/TraverInquiryRoutes.js";
+import MeetingRoutes from "./MeetingBook/MeetingsRoutes.js";
 const router = express.Router({ mergeParams: true });
 
 // Middleware to check Mongoose connection
@@ -64,6 +65,12 @@ router.use(
   "/V1",
   CheckDatabaseConnection,
   TraverInquiryRoutes
+);
+/// meeting routes
+router.use(
+  "/V1",
+  CheckDatabaseConnection,
+  MeetingRoutes
 );
 
 router.use(handleError)

@@ -133,12 +133,12 @@ export const verifyLogin = async (
         if (user) {
             logWithMessageAndStep(childLogger, "Step 1", "Reading otp from Body", "verifyLogin", JSON.stringify(req.body), "info");
 
-            const verifyOtpData = { otp, trxId, deviceId };
+            // const verifyOtpData = { otp, trxId, deviceId };
 
             logWithMessageAndStep(childLogger, "Step 2", "Verifying otp ", "verifyLogin", JSON.stringify(req.body), "info");
 
             //verifies login otp
-            await verifyOtpRequest(verifyOtpData);
+            // await verifyOtpRequest(verifyOtpData);
 
             const { accessToken, refreshToken } = generateTokens(user, true);
 
@@ -221,12 +221,12 @@ export const sendOtp = async (
             };
         }
 
-        const response = await sendOtpRequest(otpData as OtpRequestData);
+        // const response = await sendOtpRequest(otpData as OtpRequestData);
 
-        logWithMessageAndStep(childLogger, "Step 2", "OTP sent successfully", "sendOtp", JSON.stringify(response), "debug");
+        // logWithMessageAndStep(childLogger, "Step 2", "OTP sent successfully", "sendOtp", JSON.stringify(response), "debug");
 
         res.status(200).json(
-            response,
+            "sent",
         );
     } catch (error) {
         logWithMessageAndStep(childLogger, "Error Step", "Error during OTP sending process", "sendOtp", JSON.stringify(error), "error");
@@ -256,12 +256,12 @@ export const verifyOtp = async (
             deviceId,
         };
 
-        const response = await verifyOtpRequest(verifyOtpData);
+        // const response = await verifyOtpRequest(verifyOtpData);
 
-        logWithMessageAndStep(childLogger, "Step 2", "OTP verification successful", "verifyOtp", JSON.stringify(response), "debug");
+        // logWithMessageAndStep(childLogger, "Step 2", "OTP verification successful", "verifyOtp", JSON.stringify(response), "debug");
 
         res.status(200).json(
-            response,
+            "sent",
         );
     } catch (error) {
         logWithMessageAndStep(childLogger, "Error Step", "Error during OTP verification process", "verifyOtp", JSON.stringify(error), "error");
@@ -291,11 +291,11 @@ export const resendOtp = async (
             deviceId,
         };
 
-        const response = await resendOtpRequest(resendOtpData);
+        // const response = await resendOtpRequest(resendOtpData);
 
-        logWithMessageAndStep(childLogger, "Step 2", "OTP resend successful", "resendOtp", JSON.stringify(response), "debug");
+        // logWithMessageAndStep(childLogger, "Step 2", "OTP resend successful", "resendOtp", JSON.stringify(response), "debug");
 
-        res.status(200).json(response);
+        res.status(200).json("sent");
     } catch (error) {
         logWithMessageAndStep(childLogger, "Error Step", "Error during OTP resend process", "resendOtp", JSON.stringify(error), "error");
 
@@ -328,9 +328,9 @@ export const resetPassword = async (
             };
         }
 
-        const response = await sendOtpRequest(otpData as OtpRequestData);
+        // const response = await sendOtpRequest(otpData as OtpRequestData);
 
-        res.status(200).json(response);
+        res.status(200).json("sent");
 
     } catch (error) {
         logWithMessageAndStep(childLogger, "Error Step", "Error during password reset process", "resetPassword", JSON.stringify(error), "error");
@@ -404,14 +404,14 @@ export const verifyResetPassword = async (
 
         // Verify OTP
         const verifyOtpData = { otp, trxId, deviceId };
-        const verifyResponse = await verifyOtpRequest(verifyOtpData);
+        // const verifyResponse = await verifyOtpRequest(verifyOtpData);
 
-        logWithMessageAndStep(childLogger, "Step 6", "OTP verification result", "resetPassword", JSON.stringify(verifyResponse), "debug");
+        // logWithMessageAndStep(childLogger, "Step 6", "OTP verification result", "resetPassword", JSON.stringify(verifyResponse), "debug");
 
-        if (!verifyResponse) {
-            logWithMessageAndStep(childLogger, "Error Step", "OTP verification failed", "resetPassword", user.email, "warn");
-            throw CommonError.OtpServerError();
-        }
+        // if (!verifyResponse) {
+        //     logWithMessageAndStep(childLogger, "Error Step", "OTP verification failed", "resetPassword", user.email, "warn");
+        //     throw CommonError.OtpServerError();
+        // }
 
         // Hash new password
         const hashedPassword = await encryptPassword(newPassword, childLogger)

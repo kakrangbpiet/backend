@@ -108,6 +108,30 @@ model TravelInquiry {
   paymentInfoId  String?       @unique
 }
 
+model Meeting {
+  id              String   @id @default(cuid())
+  name            String
+  email           String
+  phoneNumber           String
+  meetingDateTime DateTime
+  meetingType     String   // support, sales, consultation, demo
+  topics          String[]
+  agreeTerms      Boolean
+  status          String   // scheduled, completed, canceled, rescheduled
+  parentMeetingId String?
+  parentMeeting   Meeting? @relation("MeetingChildren", fields: [parentMeetingId], references: [id])
+  childMeetings   Meeting[] @relation("MeetingChildren")
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([email])
+  @@index([phoneNumber])
+  @@index([meetingDateTime])
+  @@index([status])
+  @@index([parentMeetingId])
+}
+
 model PaymentInfo {
   id               String      @id @default(cuid())
   paymentMethod    String
