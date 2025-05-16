@@ -3,13 +3,17 @@ import {
   bookMeeting,
   getMeetingById,
   getClientMeetings,
-  getChildMeetings,
+  // getChildMeetings,
   updateMeetingStatus,
   rescheduleMeeting,
   cancelMeeting,
   getAllMeetings,
   deleteMeeting,
-  updateMeetingDetails
+  updateMeetingDetails,
+  deleteMeetingNote,
+  updateMeetingNote,
+  getMeetingNotes,
+  addNotesToMeeting
 } from "../../Controllers/Meetings/MeetingController.js";
 import checkJwt from "../../Middleware/checkJwt.js";
 import { UserCategory } from "../../DataTypes/enums/IUserEnums.js";
@@ -138,30 +142,7 @@ router.get("/clientmeetings/client",
   checkJwt([ UserCategory.SUPER_ADMIN, UserCategory.GYS_USER, UserCategory.User]), 
   getClientMeetings);
 
-/**
- * @swagger
- * /meetings/parent/children/{parentId}:
- *   get:
- *     summary: Get all child meetings for a parent meeting
- *     tags: [Meetings]
- *     parameters:
- *       - in: path
- *         name: parentId
- *         schema:
- *           type: string
- *         required: true
- *         description: Parent meeting ID
- *     responses:
- *       200:
- *         description: List of child meetings
- *       404:
- *         description: Parent meeting not found
- *       500:
- *         description: Internal server error
- */
-router.get("/meetings/parent/children/:parentId",
-  checkJwt([ UserCategory.SUPER_ADMIN, UserCategory.GYS_USER, UserCategory.User]), 
-  getChildMeetings);
+
 
 /**
  * @swagger
@@ -429,4 +410,158 @@ router.patch("/meetings/details/:id",
    checkJwt([ UserCategory.SUPER_ADMIN]),  
   updateMeetingDetails);
 
+
+/**
+ * @swagger
+ * /meetings/{id}/notes:
+ *   post:
+ *     summary: Add notes to a meeting
+ *     tags: [Meetings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Meeting ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - content
+ *             properties:
+ *               content:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Note added successfully
+ *       400:
+ *         description: Bad request - missing content
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Meeting not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/meetings/notes/:id", 
+  checkJwt([UserCategory.SUPER_ADMIN, UserCategory.GYS_USER, UserCategory.User]), 
+  addNotesToMeeting);
+
+/**
+ * @swagger
+ * /meetings/{id}/notes:
+ *   get:
+ *     summary: Get all notes for a meeting
+ *     tags: [Meetings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Meeting ID
+ *     responses:
+ *       200:
+ *         description: List of meeting notes
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Meeting not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/meetings/notes/:id", 
+  checkJwt([UserCategory.SUPER_ADMIN, UserCategory.GYS_USER, UserCategory.User]), 
+  getMeetingNotes);
+
+/**
+ * @swagger
+ * /meetings/{id}/notes/{noteId}:
+ *   patch:
+ *     summary: Update a meeting note
+ *     tags: [Meetings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Meeting ID
+ *       - in: path
+ *         name: noteId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Note ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - content
+ *             properties:
+ *               content:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Note updated successfully
+ *       400:
+ *         description: Bad request - missing content
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Meeting or note not found
+ *       500:
+ *         description: Internal server error
+ */
+router.patch("/meetings/notes/:id/:noteId", 
+  checkJwt([UserCategory.SUPER_ADMIN]), 
+  updateMeetingNote);
+
+/**
+ * @swagger
+ * /meetings/{id}/notes/{noteId}:
+ *   delete:
+ *     summary: Delete a meeting note
+ *     tags: [Meetings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Meeting ID
+ *       - in: path
+ *         name: noteId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Note ID
+ *     responses:
+ *       200:
+ *         description: Note deleted successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Meeting or note not found
+ *       500:
+ *         description: Internal server error
+ */
+router.delete("/meetings/notes/:id/:noteId", 
+  checkJwt([UserCategory.SUPER_ADMIN, ]), 
+  deleteMeetingNote);
 export default router;

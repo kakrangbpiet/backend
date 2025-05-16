@@ -121,7 +121,7 @@ model Meeting {
   parentMeetingId String?
   parentMeeting   Meeting? @relation("MeetingChildren", fields: [parentMeetingId], references: [id])
   childMeetings   Meeting[] @relation("MeetingChildren")
-  notes           String?
+  notes           MeetingNote[]
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -130,6 +130,19 @@ model Meeting {
   @@index([meetingDateTime])
   @@index([status])
   @@index([parentMeetingId])
+}
+
+model MeetingNote {
+  id        String   @id @default(cuid())
+  content   String
+  authorId  String?  // Optional - if you want to track who created the note
+  meeting   Meeting  @relation(fields: [meetingId], references: [id])
+  meetingId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([meetingId])
+  @@index([authorId])
 }
 
 model PaymentInfo {

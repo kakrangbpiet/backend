@@ -82,8 +82,6 @@ class TwilioOtpService {
             if (!phoneNumber || !otp) {
                 throw TwilioError.InvalidVerificationParams();
             }
-            console.log(phoneNumber,otp);
-            
 
             const formattedNumber = `+91${phoneNumber}`;
             
