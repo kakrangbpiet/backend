@@ -3,7 +3,7 @@ import winston from "winston";
 import { prisma } from "../../Utils/db/client.js";
 import { logWithMessageAndStep } from "../../Utils/Logger/logger.js";
 import { RequestWithUser } from "../../Middleware/checkJwt.js";
-import { UserCategory } from "../../DataTypes/enums/IUserEnums.js";
+import { meetingTypes, UserCategory } from "../../DataTypes/enums/IUserEnums.js";
 
 /**
  * Book a new meeting (can be parent or child meeting)
@@ -44,7 +44,8 @@ export const bookMeeting = async (
     }
 
     // Validate meeting type
-    const validMeetingTypes = ["support", "sales", "consultation", "demo"];
+    const validMeetingTypes = meetingTypes.map(meeting => meeting.value);
+
     if (!validMeetingTypes.includes(meetingData.meetingType)) {
       return res.status(400).json({
         error: `Invalid meeting type. Must be one of: ${validMeetingTypes.join(", ")}`
