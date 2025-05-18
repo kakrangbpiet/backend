@@ -1,7 +1,7 @@
 {
 
-    "name": "explorer",
-    "version": "0.0.1",
+    "name": "skaya-explorer",
+    "version": "0.0.3",
     "description": "A blockchain SDK to fetch data from multiple chains without the need of chaning code",
     "main": "dist/src/index.js",
     "types": "dist/src/index.d.ts",
