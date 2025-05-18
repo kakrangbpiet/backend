@@ -229,7 +229,7 @@ export const getClientMeetings = async (
         notes: includeNotes === 'true'
       },
       orderBy: {
-        meetingDateTime: 'desc'
+        meetingDateTime: 'asc'
       }
     });
     const isOwner = meetings[0].phoneNumber === phoneNumber;

@@ -1,0 +1,30 @@
+{
+
+    "name": "explorer",
+    "version": "0.0.1",
+    "description": "A blockchain SDK to fetch data from multiple chains without the need of chaning code",
+    "main": "dist/src/index.js",
+    "types": "dist/src/index.d.ts",
+    "type": "module",
+    "scripts": {
+      "build": "tsc",
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+      "blockchain",
+      "sdk",
+      "ethers"
+    ],
+    "author": "metakul",
+    "license": "ISC",
+    "bugs": {
+    },
+    "dependencies": {
+      "ethers": "^6.13.4"
+    },
+    "devDependencies": {
+      "@types/node": "^22.7.5",
+      "ts-node": "^10.9.2",
+      "typescript": "^5.6.3"
+    }
+  }

@@ -237,3 +237,28 @@ export const TwilioError = {
         details: "The OTP has expired, please request a new one"
     }),
 };
+
+
+export const BlockchainError = {
+    MissingPrivateKey: (): ErrorObject => ({
+        statusCode: 400,
+        message: "Missing Private Key",
+        details: "A valid private key must be provided to execute this action."
+    }),
+    MissingContractNameOrPrivateKey: (): ErrorObject => ({
+        statusCode: 400,
+        message: "Missing Contract Name or Private Key",
+        details: "Both contract name and private key must be provided."
+    }),
+    HardhatError: (hardhatError:any): ErrorObject => ({
+        statusCode: 400,
+        message: "Error interacting with blockchain",
+        details: hardhatError
+    }),
+    MissingrpcUrl : (): ErrorObject =>({
+        statusCode: 400,
+        message: "Rpc Url Required",
+        details: "A valid Rpc endpoint is needed to interact with blockchain."
+    })
+    // Add other specific blockchain-related errors as needed
+};

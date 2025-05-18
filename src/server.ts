@@ -38,11 +38,12 @@ setupSwagger(app);
 // Route for handling requests
 app.use("/", router);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5001;
 // Start the server
 const server = app.listen(PORT, function(){
   console.log(`Express server listening on port ${PORT} in localhost`);
 });
-
 // Initialize WebSocket server
 setupWebSocketServer(server);
+
+// Initialize PeerJS server
