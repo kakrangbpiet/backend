@@ -134,6 +134,7 @@ model Meeting {
 
 model MeetingNote {
   id        String   @id @default(cuid())
+  topic     String   @default("General")
   content   String
   authorId  String?  // Optional - if you want to track who created the note
   meeting   Meeting  @relation(fields: [meetingId], references: [id])

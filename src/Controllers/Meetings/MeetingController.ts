@@ -771,7 +771,6 @@ export const updateMeetingDetails = async (
     next(error);
   }
 };
-
 /**
  * Add notes to a meeting
  */
@@ -782,8 +781,8 @@ export const addNotesToMeeting = async (
 ) => {
   const childLogger = (req as any).childLogger as winston.Logger;
   const { id } = req.params;
-  const { content } = req.body;
-  const phoneNumber=req.user?.phoneNumber;
+  const { topic, content } = req.body;
+  const phoneNumber = req.user?.phoneNumber;
 
   try {
     logWithMessageAndStep(
@@ -791,13 +790,19 @@ export const addNotesToMeeting = async (
       "Step 1",
       "Adding notes to meeting",
       "addNotesToMeeting",
-      `Meeting ID: ${id}, Note: ${content?.substring(0, 20)}...`,
+      `Meeting ID: ${id}, Topic: ${topic}, Note: ${content?.substring(0, 20)}...`,
       "info"
     );
 
     if (!content) {
       return res.status(400).json({
         error: "Note content is required"
+      });
+    }
+
+    if (!topic) {
+      return res.status(400).json({
+        error: "Note topic is required"
       });
     }
 
@@ -811,7 +816,8 @@ export const addNotesToMeeting = async (
         error: "Meeting not found"
       });
     }
-     // Verify that either:
+
+    // Verify that either:
     // 1. The meeting's phoneNumber matches the user's phoneNumber (owner), OR
     // 2. The user is a SUPER_ADMIN
     const isOwner = meeting.phoneNumber === phoneNumber;
@@ -823,10 +829,10 @@ export const addNotesToMeeting = async (
       });
     }
 
-
-    // Create a new note
+    // Create a new note with topic
     const newNote = await prisma.meetingNote.create({
       data: {
+        topic,
         content,
         meetingId: id,
         authorId: req.user?.id || "system"
@@ -858,7 +864,6 @@ export const addNotesToMeeting = async (
     next(error);
   }
 };
-
 /**
  * Get all notes for a meeting
  */
