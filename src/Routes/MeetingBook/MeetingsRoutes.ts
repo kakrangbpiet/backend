@@ -484,7 +484,7 @@ router.get("/meetings/notes/:id",
 
 /**
  * @swagger
- * /meetings/{id}/notes/{noteId}:
+ * /meetings/notes/{id}/{noteId}:
  *   patch:
  *     summary: Update a meeting note
  *     tags: [Meetings]
@@ -527,12 +527,12 @@ router.get("/meetings/notes/:id",
  *         description: Internal server error
  */
 router.patch("/meetings/notes/:id/:noteId", 
-  checkJwt([UserCategory.SUPER_ADMIN]), 
+    checkJwt([UserCategory.SUPER_ADMIN, UserCategory.GYS_USER, UserCategory.User]), 
   updateMeetingNote);
 
 /**
  * @swagger
- * /meetings/{id}/notes/{noteId}:
+ * /meetings/notes/{id}/{noteId}:
  *   delete:
  *     summary: Delete a meeting note
  *     tags: [Meetings]
