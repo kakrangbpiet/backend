@@ -2,6 +2,7 @@ import { Router } from "express";
 import { createTravelInquiry, getUserInquiries, getInquiryDetails, updateInquiryStatus, GetPrompt } from "../../Controllers/Travel/Inquiry/TravelInquiry.js";
 import checkJwt from "../../Middleware/checkJwt.js";
 import { UserCategory } from "../../DataTypes/enums/IUserEnums.js";
+import IsOwnerOrAdminTravelinquiry from "src/Middleware/IsOwnerOrAdminTravelinquiry.js";
 
 const router = Router();
 
@@ -105,7 +106,9 @@ router.get("/TravelInquiry/:userId",
  *       404:
  *         description: Inquiry not found
  */
-router.get("/TravelInquiry/:id", getInquiryDetails);
+router.get("/TravelInquiry/:id",
+    IsOwnerOrAdminTravelinquiry(),
+     getInquiryDetails);
 
 /**
  * @swagger
@@ -139,6 +142,7 @@ router.get("/TravelInquiry/:id", getInquiryDetails);
  */
 router.patch("/TravelInquiry/status/:id",
     checkJwt([UserCategory.User,UserCategory.SUPER_ADMIN]),
+    IsOwnerOrAdminTravelinquiry(),
     updateInquiryStatus
 );
 

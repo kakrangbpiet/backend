@@ -17,6 +17,7 @@ import {
 } from "../../Controllers/Meetings/MeetingController.js";
 import checkJwt from "../../Middleware/checkJwt.js";
 import { UserCategory } from "../../DataTypes/enums/IUserEnums.js";
+import IsOwnerOrAdmin from "../../Middleware/isOwnerOrAdminMeeting.js";
 
 const router = express.Router({ mergeParams: true });
 
@@ -527,7 +528,8 @@ router.get("/meetings/notes/:id",
  *         description: Internal server error
  */
 router.patch("/meetings/notes/:id/:noteId", 
-    checkJwt([UserCategory.SUPER_ADMIN, UserCategory.GYS_USER, UserCategory.User]), 
+  checkJwt([UserCategory.SUPER_ADMIN, UserCategory.GYS_USER, UserCategory.User]), 
+  IsOwnerOrAdmin(),
   updateMeetingNote);
 
 /**
