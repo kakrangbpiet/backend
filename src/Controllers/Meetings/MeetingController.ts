@@ -156,14 +156,7 @@ export const getMeetingById = async (
         error: "Meeting not found"
       });
     }
-    const isOwner = meeting.phoneNumber === phoneNumber;
-    const isAdmin = req.user?.category === UserCategory.SUPER_ADMIN;
-    
-    if (!isOwner && !isAdmin) {
-      return res.status(403).json({
-        error: "You are not authorized for this"
-      });
-    }
+
     logWithMessageAndStep(
       childLogger,
       "Step 2",
@@ -233,14 +226,7 @@ export const getClientMeetings = async (
         meetingDateTime: 'asc'
       }
     });
-    const isOwner = meetings[0].phoneNumber === phoneNumber;
-    const isAdmin = req.user?.category === UserCategory.SUPER_ADMIN;
-    
-    if (!isOwner && !isAdmin) {
-      return res.status(403).json({
-        error: "You are not authorized for this"
-      });
-    }
+
     logWithMessageAndStep(
       childLogger,
       "Step 2",
@@ -817,17 +803,7 @@ export const addNotesToMeeting = async (
       });
     }
 
-    // Verify that either:
-    // 1. The meeting's phoneNumber matches the user's phoneNumber (owner), OR
-    // 2. The user is a SUPER_ADMIN
-    const isOwner = meeting.phoneNumber === phoneNumber;
-    const isAdmin = req.user?.category === UserCategory.SUPER_ADMIN;
-    
-    if (!isOwner && !isAdmin) {
-      return res.status(403).json({
-        error: "You are not authorized to add notes to this meeting"
-      });
-    }
+
 
     // Create a new note with topic
     const newNote = await prisma.meetingNote.create({
@@ -895,18 +871,6 @@ export const getMeetingNotes = async (
         error: "Meeting not found"
       });
     }
-     // Verify that either:
-    // 1. The meeting's phoneNumber matches the user's phoneNumber (owner), OR
-    // 2. The user is a SUPER_ADMIN
-    const isOwner = meeting.phoneNumber === phoneNumber;
-    const isAdmin = req.user?.category === UserCategory.SUPER_ADMIN;
-    
-    if (!isOwner && !isAdmin) {
-      return res.status(403).json({
-        error: "You are not authorized to add notes to this meeting"
-      });
-    }
-
 
     // Get all notes for this meeting
     const notes = await prisma.meetingNote.findMany({

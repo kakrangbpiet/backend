@@ -91,7 +91,7 @@ async function sendStats(ws) {
         } catch (error) {
             console.error('Error sending stats update:', error);
         }
-    }, 10000); // Send updates every 5 seconds
+    }, 7000); // Send updates every 7 seconds
 
     ws.on('close', () => {
         clearInterval(interval);

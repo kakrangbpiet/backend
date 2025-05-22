@@ -2,7 +2,7 @@ import { Router } from "express";
 import { createTravelInquiry, getUserInquiries, getInquiryDetails, updateInquiryStatus, GetPrompt } from "../../Controllers/Travel/Inquiry/TravelInquiry.js";
 import checkJwt from "../../Middleware/checkJwt.js";
 import { UserCategory } from "../../DataTypes/enums/IUserEnums.js";
-import IsOwnerOrAdminTravelinquiry from "src/Middleware/IsOwnerOrAdminTravelinquiry.js";
+import IsOwnerOrAdminTravelinquiry from "../../Middleware/IsOwnerOrAdminTravelinquiry.js";
 
 const router = Router();
 
