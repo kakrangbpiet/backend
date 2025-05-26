@@ -768,7 +768,6 @@ export const addNotesToMeeting = async (
   const childLogger = (req as any).childLogger as winston.Logger;
   const { id } = req.params;
   const { topic, content } = req.body;
-  const phoneNumber = req.user?.phoneNumber;
 
   try {
     logWithMessageAndStep(

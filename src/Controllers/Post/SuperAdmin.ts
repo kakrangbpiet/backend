@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import { ErrorEnum, SuperAdminError } from "../../DataTypes/enums/Error.js";
 import { SystemAdminValidation } from "../../Validation/UserValidation.js";
 
@@ -9,6 +9,8 @@ import winston from "winston";
 import { IsystemAdmin } from "../../DataTypes/Interfaces/IUser.js";
 import { logWithMessageAndStep } from "../../Utils/Logger/logger.js";
 import { prisma } from "../../Utils/db/client.js";
+import { RequestWithUser } from "../../Middleware/checkJwt.js";
+import config from "../../config.js";
 
 /**
  * Create Super Admin
@@ -18,17 +20,22 @@ import { prisma } from "../../Utils/db/client.js";
  */
 
 export const Create_superAdmin = async (
-    req: Request,
+    req: RequestWithUser,
     res: Response,
     next: NextFunction
 ) => {
     const childLogger = (req as any).childLogger as winston.Logger;
+    const phoneNumber = req.user?.phoneNumber;
 
     if (!childLogger) {
         console.error('Child Logger not found on request object');
         return next(new Error('Internal Server Error'));
     }
 
+    if (phoneNumber!==config.SUPER_ADMIN_PHONE_NUMBER) {
+        console.error('Child Logger not found on request object');
+        return next(new Error('Internal Server Error'));
+    }
     try {
         logWithMessageAndStep(childLogger, "Step 1", "Reading FormData via Body", "Create_superAdmin", JSON.stringify(req.body.email), "info");
 

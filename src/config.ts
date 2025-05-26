@@ -39,7 +39,7 @@ export default {
     
     // WhatsApp Configuration
     WHATSAPP_ACCESS_TOKEN: process.env.WHATSAPP_ACCESS_TOKEN || "",  
-    PHONE_NUMBER: process.env.PHONE_NUMBER || "",  
+    SUPER_ADMIN_PHONE_NUMBER: process.env.SUPER_ADMIN_PHONE_NUMBER || "",  
     WHATSAPP_BUSINESS_ID: process.env.WHATSAPP_BUSINESS_ID || "",
     
     // OpenAI

@@ -23,7 +23,7 @@ interface WhatsAppMessageData {
 // Configuration
 const WHATSAPP_API_URL = `https://graph.facebook.com/v19.0/${config.WHATSAPP_BUSINESS_ID}/messages`;
 const ACCESS_TOKEN = config.WHATSAPP_ACCESS_TOKEN;
-const ADMIN_PHONE_NUMBER = config.PHONE_NUMBER;
+const ADMIN_PHONE_NUMBER = config.SUPER_ADMIN_PHONE_NUMBER;
 const MAX_RETRIES = 5;
 const RETRY_DELAY_MS = 1000; // 1 second delay between retries
 
