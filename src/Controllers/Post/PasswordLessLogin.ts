@@ -9,7 +9,7 @@ import { IUser } from "../../DataTypes/Interfaces/IUser.js";
 import { PasswordLessUserValidation } from "../../Validation/UserValidation.js";
 import { generateTokens, refreshAccessToken } from "../../Utils/scripts/jwtToken.js";
 import { Prisma } from "@prisma/client";
-// import { twilioOtpService } from "../../externalApis/twilioOtpService.js";
+import { otpService } from "../../externalApis/twilioOpimized.js";
 
 /**
  * add new user
@@ -51,7 +51,6 @@ export const addUser = async (userModelValidation: IUser, childLogger: any) => {
         throw DbError.ErrorOfPrisma(error);
     }
 };
-
 
 export const loginWithOtp = async (
     req: Request,
@@ -354,10 +353,10 @@ export const refreshLoginToken = async (
 const mockSendOtpRequest = async (otpData: any) => {
     // Simulate a delay for async behavior
     try {
-        // const { trxId } = await twilioOtpService.sendLoginOtp(otpData.phoneNumber);
+        const { trxId } = await otpService.sendOtp(otpData.phoneNumber);
         return {
             status: "success",
-            trxId: "mocked-trx-id",
+            trxId: trxId,
             message: "OTP sent successfully",
         };
     } catch (error) {
@@ -368,9 +367,9 @@ const mockSendOtpRequest = async (otpData: any) => {
 
 const mockVerifyOtpRequest = async (verifyOtpData: any) => {
     // Simulate a delay for async behavior
-
-    // const isSuccess = await twilioOtpService.verifyLoginOtp(verifyOtpData.phoneNumber,verifyOtpData.otp );
-const isSuccess=true
+     const otpCode= verifyOtpData.otp;
+     const to= verifyOtpData.phoneNumber;
+    const isSuccess = await otpService.verifyOtp(to,otpCode );
     if (isSuccess) {
         return {
             status: "success",

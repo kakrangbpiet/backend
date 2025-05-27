@@ -5,17 +5,16 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  
 }
 
 model superAdmin {
   id          String   @id @default(uuid())
   email       String   @unique
   name        String
-  phoneNumber     String?  @unique 
   password    String
   category    String
   permissions String[]
+  phoneNumber String?  @unique
 }
 
 model samsarauser {
@@ -31,7 +30,7 @@ model samsarauser {
   permissions      String[] @default([])
   roleId           String?
   razorpayPayments String[] @default([])
-  cartItems Json[] @default([])
+  cartItems        Json[]   @default([])
 }
 
 model unverifiedsamsarauser {
@@ -42,22 +41,22 @@ model unverifiedsamsarauser {
 }
 
 model TravelPackage {
-  id             String   @id @default(uuid())
-  title          String
-  description    String
-  image          String
-  images         String[]
-  location       String
-  category       String
-  status         String   @default("active")
-  maxTravelers   Int?
-  availableSpots Int?
-  travelType     String?
-  activities     String[]
+  id                 String             @id @default(uuid())
+  title              String
+  description        String
+  image              String
+  images             String[]
+  location           String
+  category           String
+  status             String             @default("active")
+  maxTravelers       Int?
+  availableSpots     Int?
+  travelType         String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  activities         String[]
   dateAvailabilities DateAvailability[]
-  videos         TravelVideo[]   
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  videos             TravelVideo[]
 
   @@index([status])
   @@index([category])
@@ -67,63 +66,62 @@ model TravelPackage {
 }
 
 model TravelVideo {
-  id           String   @id @default(uuid())
-  awsUrl   String   // base64-encoded video string
+  id              String        @id @default(uuid())
   travelPackageId String
+  createdAt       DateTime      @default(now())
+  awsUrl          String
   travelPackage   TravelPackage @relation(fields: [travelPackageId], references: [id])
-
-  createdAt    DateTime @default(now())
 }
 
 model DateAvailability {
-  id             String          @id @default(cuid())
-  startDate      Int             // Unix timestamp
-  endDate        Int             // Unix timestamp
-  maxTravelers   Int
-  availableSpots Int
-  price          Float?
-  originalPrice  Float?
-  travelPackage  TravelPackage   @relation(fields: [travelPackageId], references: [id])
+  id              String        @id @default(cuid())
+  startDate       Int
+  endDate         Int
+  maxTravelers    Int
+  availableSpots  Int
   travelPackageId String
+  originalPrice   Float?
+  price           Float?
+  travelPackage   TravelPackage @relation(fields: [travelPackageId], references: [id])
 }
 
 model TravelInquiry {
-  id             String       @id @default(cuid())
-  packageId      String
-  packageTitle   String
-  destination    String
-  address        String?
-  passengerCount Int
-  startDate      Int
-  endDate        Int
-  tripType       String
+  id              String       @id @default(cuid())
+  packageId       String
+  packageTitle    String
+  destination     String
+  address         String?
+  passengerCount  Int
+  tripType        String
   specialRequests String?
-  status         String
-  userId         String?
-  name           String?
-  email          String?
-  phoneNumber    String?
-  createdAt      DateTime      @default(now())
-  paymentInfo    PaymentInfo?  @relation(fields: [paymentInfoId], references: [id])
-  paymentInfoId  String?       @unique
+  status          String
+  userId          String?
+  name            String?
+  email           String?
+  phoneNumber     String?
+  createdAt       DateTime     @default(now())
+  paymentInfoId   String?      @unique
+  startDate       Int
+  endDate         Int
+  paymentInfo     PaymentInfo? @relation(fields: [paymentInfoId], references: [id])
 }
 
 model Meeting {
-  id              String   @id @default(cuid())
+  id              String        @id @default(cuid())
   name            String
   email           String
-  phoneNumber           String
   meetingDateTime DateTime
-  meetingType     String   // support, sales, consultation, demo
+  meetingType     String
   topics          String[]
   agreeTerms      Boolean
-  status          String   // scheduled, completed, canceled, rescheduled
+  status          String
   parentMeetingId String?
-  parentMeeting   Meeting? @relation("MeetingChildren", fields: [parentMeetingId], references: [id])
-  childMeetings   Meeting[] @relation("MeetingChildren")
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  phoneNumber     String
+  parentMeeting   Meeting?      @relation("MeetingChildren", fields: [parentMeetingId], references: [id])
+  childMeetings   Meeting[]     @relation("MeetingChildren")
   notes           MeetingNote[]
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
 
   @@index([email])
   @@index([phoneNumber])
@@ -134,26 +132,44 @@ model Meeting {
 
 model MeetingNote {
   id        String   @id @default(cuid())
-  topic     String   @default("General")
   content   String
-  authorId  String?  // Optional - if you want to track who created the note
-  meeting   Meeting  @relation(fields: [meetingId], references: [id])
+  authorId  String?
   meetingId String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  topic     String   @default("General")
+  meeting   Meeting  @relation(fields: [meetingId], references: [id])
 
   @@index([meetingId])
   @@index([authorId])
 }
 
 model PaymentInfo {
-  id               String      @id @default(cuid())
-  paymentMethod    String
-  amount           Float
-  currency         String
-  status           String      // e.g., 'pending', 'completed', 'failed'
-  transactionId    String?
-  travelInquiry    TravelInquiry? @relation
-  createdAt        DateTime    @default(now())
+  id            String         @id @default(cuid())
+  paymentMethod String
+  amount        Float
+  currency      String
+  status        String
+  transactionId String?
+  createdAt     DateTime       @default(now())
+  travelInquiry TravelInquiry?
 }
 
+
+model OtpVerification {
+  id          String   @id @default(uuid())
+  otpType     String   // 'login', 'registration', 'password-reset', etc.
+  to          String   // recipient phone number or email
+  from        String   // sender identifier (Twilio number)
+  message     String?  // message content
+  otpCode     String   // the OTP code
+  expiresAt   DateTime // when the OTP expires
+  verified    Boolean  @default(false)
+  attempts    Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([to, otpType])
+  @@index([expiresAt])
+  @@index([verified])
+}
