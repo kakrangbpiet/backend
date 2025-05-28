@@ -1311,6 +1311,7 @@ export const uploadVideosToRandomTravelVideos = [
 }
 ]
 
+
 /**
  * Ultra-fast random video endpoint with pre-caching headers
  */
@@ -1331,7 +1332,7 @@ export const getRandomHomeVideoOptimized = async (req: Request, res: Response,
     }
 
     // Select random video
-    const videoFiles = data.Contents.filter(obj => 
+    const videoFiles = data.Contents.filter(obj =>
       obj.Key?.match(/\.(mp4|mov|avi|webm)$/i)
     );
     const randomVideo = videoFiles[Math.floor(Math.random() * videoFiles.length)];
@@ -1340,11 +1341,19 @@ export const getRandomHomeVideoOptimized = async (req: Request, res: Response,
       return res.status(404).json({ error: "Video not found" });
     }
 
-    // Generate pre-signed URL 
-    const videoUrl = await s3.getSignedUrlPromise('getObject', {
-      Bucket: process.env.S3_BUCKET_NAME!,
-      Key: randomVideo.Key,
-    });
+    // Construct the public URL directly for publicly readable objects
+    // The format is: https://<bucket-name>.s3.<region>.amazonaws.com/<key>
+    const bucketName = process.env.S3_BUCKET_NAME!;
+    // You might need to get the region dynamically or from an environment variable if not already available
+    // Example: If using AWS SDK v3, you can get it from the S3 client config. For v2, it's typically in the config.
+    const region = s3.config.region || process.env.AWS_REGION; // Ensure you have AWS_REGION or s3.config.region set up
+
+    if (!region) {
+      throw new Error("AWS region not configured for S3 URL construction.");
+    }
+
+    const videoUrl = `https://<span class="math-inline">\{bucketName\}\.s3\.</span>{region}.amazonaws.com/${randomVideo.Key}`;
+
 
     // Set aggressive caching headers
     res.set({
@@ -1357,7 +1366,7 @@ export const getRandomHomeVideoOptimized = async (req: Request, res: Response,
         url: videoUrl,
         key: randomVideo.Key,
         size: randomVideo.Size,
-        preloadHint: `${process.env.API_URL}/videos/preload/${encodeURIComponent(randomVideo.Key)}`
+        preloadHint: `<span class="math-inline">\{process\.env\.API\_URL\}/videos/preload/</span>{encodeURIComponent(randomVideo.Key)}`
       }
     });
   } catch (error) {
