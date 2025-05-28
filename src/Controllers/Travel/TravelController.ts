@@ -1349,8 +1349,7 @@ export const getRandomHomeVideoOptimized = async (req: Request, res: Response, n
     }
 
     // Direct public URL (no signing)
-    const videoUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${encodeURIComponent(randomVideo.Key)}`;
-
+  const videoUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${randomVideo.Key}`;
     // Set aggressive caching headers
     res.set({
       'Cache-Control': 'public, max-age=3600', // 1 hour cache
