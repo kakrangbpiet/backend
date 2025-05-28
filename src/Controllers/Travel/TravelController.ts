@@ -1350,16 +1350,6 @@ export const getRandomHomeVideoOptimized = async (req: Request, res: Response, n
 
     const videoUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${encodeURIComponent(randomVideo.Key)}`;
     
-    // Set headers to prevent caching of the API response
-    res.set({
-      'Cache-Control': 'no-store, no-cache, must-revalidate, private',
-      'Pragma': 'no-cache',
-      'Expires': '0',
-      // But allow caching of the actual video file
-      'Link': `<${videoUrl}>; rel=preload; as=video; nopush`,
-      'CDN-Cache-Control': 'public, max-age=86400' // 1 day cache at CDN for the video
-    });
-
     res.json({
       data: {
         url: videoUrl,
