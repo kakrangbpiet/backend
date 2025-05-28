@@ -1273,7 +1273,6 @@ export const uploadVideosToRandomTravelVideos = [
             Key: `homeVideos/${fileName}`,
             Body: file.buffer,
             ContentType: mimeType,
-            ACL: "public-read",
           };
 
           const uploadResult = await s3.upload(params).promise();
@@ -1345,7 +1344,7 @@ export const getRandomHomeVideoOptimized = async (req: Request, res: Response,
     const videoUrl = await s3.getSignedUrlPromise('getObject', {
       Bucket: process.env.S3_BUCKET_NAME!,
       Key: randomVideo.Key,
-      Expires: 10 // Very short expiration for security
+      Expires: 30000 // 50 min
     });
 
     // Set aggressive caching headers
