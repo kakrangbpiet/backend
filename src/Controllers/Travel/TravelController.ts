@@ -1273,6 +1273,7 @@ export const uploadVideosToRandomTravelVideos = [
             Key: `homeVideos/${fileName}`,
             Body: file.buffer,
             ContentType: mimeType,
+            ACL: 'public-read' 
           };
 
           const uploadResult = await s3.upload(params).promise();
@@ -1348,8 +1349,7 @@ export const getRandomHomeVideoOptimized = async (req: Request, res: Response, n
     }
 
     // Direct public URL (no signing)
-  const videoUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${randomVideo.Key}`;
-    // Set aggressive caching headers
+const videoUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${encodeURIComponent(randomVideo.Key)}`;
     res.set({
       'Cache-Control': 'public, max-age=3600', // 1 hour cache
       'CDN-Cache-Control': 'public, max-age=86400' // 1 day cache at CDN
