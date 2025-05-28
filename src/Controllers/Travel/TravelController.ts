@@ -8,7 +8,6 @@ import multer from 'multer';
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-
 /**
  * Create a new travel package with date availabilities
  */
@@ -144,8 +143,6 @@ export const createTravelPackage = async (
     next(error);
   }
 };
-
-
 
 /**
  * Get travel package by ID with optional field selection
@@ -348,7 +345,6 @@ export const updateTravelPackage = async (
   }
 };
 
-
 /**
  * Get all travel packages with pagination and field selection
  */
@@ -471,7 +467,6 @@ export const getAllTravelPackages = async (
     next(error);
   }
 };
-
 
 /**
  * Delete travel package
@@ -724,8 +719,6 @@ export const updateTravelPackageStatus = async (
   }
 };
 
-
-
 /**
  * Get a single random video by travel package ID, including array length and a random video
  */
@@ -782,6 +775,7 @@ export const getRandomVideosByPackageId = async (
     next(error);
   }
 };
+
 /**
  * Get videos by travel package ID, including array length and a random video
  */
@@ -973,8 +967,6 @@ export const getAllTitles = async (
     next(error);
   }
 };
-
-
 
 /**
  * Update travel package main image
@@ -1234,9 +1226,6 @@ export const updateTravelPackageVideos = async (
   }
 };
 
-
-
-
 /**
  * Upload multiple videos to randomTravelVideos folder in S3
  */
@@ -1281,7 +1270,7 @@ export const uploadVideosToRandomTravelVideos = [
 
           const params: AWS.S3.PutObjectRequest = {
             Bucket: process.env.S3_BUCKET_NAME!,
-            Key: `randomTravelVideos/${fileName}`,
+            Key: `homeVideos/${fileName}`,
             Body: file.buffer,
             ContentType: mimeType,
             ACL: "public-read",
@@ -1322,3 +1311,138 @@ export const uploadVideosToRandomTravelVideos = [
   }
 }
 ]
+
+/**
+ * Ultra-fast random video endpoint with pre-caching headers
+ */
+export const getRandomHomeVideoOptimized = async (req: Request, res: Response) => {
+  try {
+    // Get list of all videos (consider caching this in production)
+    const data = await s3.listObjectsV2({
+      Bucket: process.env.S3_BUCKET_NAME!,
+      Prefix: 'homeVideos/',
+      MaxKeys: 1000
+    }).promise();
+
+    if (!data.Contents || data.Contents.length === 0) {
+      return res.status(404).json({ error: "No videos found" });
+    }
+
+    // Select random video
+    const videoFiles = data.Contents.filter(obj => 
+      obj.Key?.match(/\.(mp4|mov|avi|webm)$/i)
+    );
+    const randomVideo = videoFiles[Math.floor(Math.random() * videoFiles.length)];
+
+    if (!randomVideo.Key) {
+      return res.status(404).json({ error: "Video not found" });
+    }
+
+    // Generate pre-signed URL with very short expiration (10 seconds)
+    const videoUrl = await s3.getSignedUrlPromise('getObject', {
+      Bucket: process.env.S3_BUCKET_NAME!,
+      Key: randomVideo.Key,
+      Expires: 10 // Very short expiration for security
+    });
+
+    // Set aggressive caching headers
+    res.set({
+      'Cache-Control': 'public, max-age=3600', // 1 hour cache
+      'CDN-Cache-Control': 'public, max-age=86400' // 1 day cache at CDN
+    });
+
+    res.json({
+      data: {
+        url: videoUrl,
+        key: randomVideo.Key,
+        size: randomVideo.Size,
+        preloadHint: `${process.env.API_URL}/videos/preload/${encodeURIComponent(randomVideo.Key)}`
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+/**
+ * Pre-load endpoint for warming up the cache
+ */
+export const preloadVideo = async (req: Request, res: Response) => {
+  const { key } = req.params;
+
+  try {
+    // Just verify the object exists and get headers
+    await s3.headObject({
+      Bucket: process.env.S3_BUCKET_NAME!,
+      Key: key
+    }).promise();
+
+    // Return minimal response
+    res.set({
+      'Cache-Control': 'public, max-age=86400',
+      'CDN-Cache-Control': 'public, max-age=86400'
+    }).status(204).end();
+  } catch (error) {
+    res.status(404).end();
+  }
+};
+
+/**
+ * Ultra-fast streaming endpoint with range support
+ */
+export const streamVideo = async (req: Request, res: Response) => {
+  const { key } = req.params;
+  const range = req.headers.range;
+
+  try {
+    const params = {
+      Bucket: process.env.S3_BUCKET_NAME!,
+      Key: key
+    };
+
+    // Get object metadata first
+    const headData = await s3.headObject(params).promise();
+    const fileSize = headData.ContentLength!;
+
+    // Determine content type
+    let contentType = 'video/mp4';
+    if (key.endsWith('.mov')) contentType = 'video/quicktime';
+    if (key.endsWith('.avi')) contentType = 'video/x-msvideo';
+    if (key.endsWith('.webm')) contentType = 'video/webm';
+
+    // Set aggressive caching headers
+    res.set({
+      'Cache-Control': 'public, max-age=31536000', // 1 year cache
+      'CDN-Cache-Control': 'public, max-age=31536000',
+      'Accept-Ranges': 'bytes',
+      'Content-Type': contentType,
+      'X-Content-Type-Options': 'nosniff'
+    });
+
+    if (range) {
+      // Parse range header
+      const parts = range.replace(/bytes=/, "").split("-");
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+      const chunkSize = (end - start) + 1;
+
+      // Set partial content headers
+      res.writeHead(206, {
+        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+        'Content-Length': chunkSize
+      });
+
+      // Stream the chunk
+      s3.getObject({
+        ...params,
+        Range: `bytes=${start}-${end}`
+      }).createReadStream().pipe(res);
+    } else {
+      // Full content
+      res.set('Content-Length', fileSize.toString());
+      s3.getObject(params).createReadStream().pipe(res);
+    }
+  } catch (error) {
+    res.status(404).end();
+  }
+};

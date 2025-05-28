@@ -17,7 +17,9 @@ import {
   updateTravelPackageVideos,
   updateTravelPackageImages,
   updateTravelPackageImage,
-  uploadVideosToRandomTravelVideos
+  uploadVideosToRandomTravelVideos,
+  getRandomHomeVideoOptimized,
+  streamVideo
 } from "../../Controllers/Travel/TravelController.js";
 import checkJwt from "../../Middleware/checkJwt.js";
 import { UserCategory } from "../../DataTypes/enums/IUserEnums.js";
@@ -755,6 +757,79 @@ router.patch("/Travel/videos/:id",
  *         description: Internal server error
  */
 router.post("/Travel/randomTravelVideos",
+  checkJwt([UserCategory.SUPER_ADMIN]),
   uploadVideosToRandomTravelVideos);
+
+  /**
+ * @swagger
+ * /Travel/home/randomVideo:
+ *   get:
+ *     summary: Get a random video from the homeVideos folder in S3
+ *     tags: [Travel]
+ *     responses:
+ *       200:
+ *         description: Random home video URL and metadata
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     videoUrl:
+ *                       type: string
+ *                       description: Pre-signed URL for the video (expires in 1 hour)
+ *                     videoKey:
+ *                       type: string
+ *                       description: S3 object key
+ *                     lastModified:
+ *                       type: string
+ *                       format: date-time
+ *                       description: When the video was last modified
+ *                     size:
+ *                       type: integer
+ *                       description: File size in bytes
+ *                     totalVideos:
+ *                       type: integer
+ *                       description: Total number of videos available
+ *                 message:
+ *                   type: string
+ *                   example: "Random home video fetched successfully"
+ *       404:
+ *         description: No videos found in homeVideos folder
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/Travel/home/randomVideo", getRandomHomeVideoOptimized);
+
+
+/**
+ * @swagger
+ * /Travel/streamVideo/{videoId}:
+ *   get:
+ *     summary: Stream video chunk by video ID
+ *     tags: [Travel]
+ *     parameters:
+ *       - in: path
+ *         name: videoId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the video to stream
+ *     responses:
+ *       206:
+ *         description: Partial Content - Video chunk streamed successfully
+ *         content:
+ *           video/mp4:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       404:
+ *         description: Video not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/Travel/streamVideo/:key", streamVideo);
 
 export default router;
