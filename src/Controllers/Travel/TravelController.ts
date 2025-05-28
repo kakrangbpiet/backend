@@ -1315,7 +1315,10 @@ export const uploadVideosToRandomTravelVideos = [
 /**
  * Ultra-fast random video endpoint with pre-caching headers
  */
-export const getRandomHomeVideoOptimized = async (req: Request, res: Response) => {
+export const getRandomHomeVideoOptimized = async (req: Request, res: Response,
+  next: NextFunction
+
+) => {
   try {
     // Get list of all videos (consider caching this in production)
     const data = await s3.listObjectsV2({
@@ -1360,14 +1363,16 @@ export const getRandomHomeVideoOptimized = async (req: Request, res: Response) =
       }
     });
   } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
+    next(error);
   }
 };
 
 /**
  * Pre-load endpoint for warming up the cache
  */
-export const preloadVideo = async (req: Request, res: Response) => {
+export const preloadVideo = async (req: Request, res: Response,
+  next: NextFunction
+) => {
   const { key } = req.params;
 
   try {
@@ -1383,14 +1388,16 @@ export const preloadVideo = async (req: Request, res: Response) => {
       'CDN-Cache-Control': 'public, max-age=86400'
     }).status(204).end();
   } catch (error) {
-    res.status(404).end();
+    next(error);
   }
 };
 
 /**
  * Ultra-fast streaming endpoint with range support
  */
-export const streamVideo = async (req: Request, res: Response) => {
+export const streamVideo = async (req: Request, res: Response,
+  next: NextFunction
+) => {
   const { key } = req.params;
   const range = req.headers.range;
 
@@ -1443,6 +1450,6 @@ export const streamVideo = async (req: Request, res: Response) => {
       s3.getObject(params).createReadStream().pipe(res);
     }
   } catch (error) {
-    res.status(404).end();
+    next(error)
   }
 };
