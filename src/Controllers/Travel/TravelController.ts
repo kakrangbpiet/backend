@@ -1340,11 +1340,10 @@ export const getRandomHomeVideoOptimized = async (req: Request, res: Response,
       return res.status(404).json({ error: "Video not found" });
     }
 
-    // Generate pre-signed URL with very short expiration (10 seconds)
+    // Generate pre-signed URL 
     const videoUrl = await s3.getSignedUrlPromise('getObject', {
       Bucket: process.env.S3_BUCKET_NAME!,
       Key: randomVideo.Key,
-      Expires: 900 // 15 min
     });
 
     // Set aggressive caching headers
