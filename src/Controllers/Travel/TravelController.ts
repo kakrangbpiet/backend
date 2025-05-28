@@ -1273,7 +1273,6 @@ export const uploadVideosToRandomTravelVideos = [
             Key: `homeVideos/${fileName}`,
             Body: file.buffer,
             ContentType: mimeType,
-            ACL: 'public-read' 
           };
 
           const uploadResult = await s3.upload(params).promise();
