@@ -1273,6 +1273,7 @@ export const uploadVideosToRandomTravelVideos = [
             Key: `homeVideos/${fileName}`,
             Body: file.buffer,
             ContentType: mimeType,
+            ACL: 'public-read' 
           };
 
           const uploadResult = await s3.upload(params).promise();
@@ -1314,11 +1315,9 @@ export const uploadVideosToRandomTravelVideos = [
 
 /**
  * Ultra-fast random video endpoint with pre-caching headers
+ * Returns direct public URLs (no signing needed)
  */
-export const getRandomHomeVideoOptimized = async (req: Request, res: Response,
-  next: NextFunction
-
-) => {
+export const getRandomHomeVideoOptimized = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Get list of all videos (consider caching this in production)
     const data = await s3.listObjectsV2({
@@ -1341,19 +1340,16 @@ export const getRandomHomeVideoOptimized = async (req: Request, res: Response,
       return res.status(404).json({ error: "Video not found" });
     }
 
-    // Construct the public URL directly for publicly readable objects
-    // The format is: https://<bucket-name>.s3.<region>.amazonaws.com/<key>
+    // Construct the public URL directly
     const bucketName = process.env.S3_BUCKET_NAME!;
-    // You might need to get the region dynamically or from an environment variable if not already available
-    // Example: If using AWS SDK v3, you can get it from the S3 client config. For v2, it's typically in the config.
-    const region = s3.config.region || process.env.AWS_REGION; // Ensure you have AWS_REGION or s3.config.region set up
-
+    const region = s3.config.region || process.env.AWS_REGION;
+    
     if (!region) {
       throw new Error("AWS region not configured for S3 URL construction.");
     }
 
-    const videoUrl = `https://<span class="math-inline">\{bucketName\}\.s3\.</span>{region}.amazonaws.com/${randomVideo.Key}`;
-
+    // Direct public URL (no signing)
+    const videoUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${encodeURIComponent(randomVideo.Key)}`;
 
     // Set aggressive caching headers
     res.set({
@@ -1366,7 +1362,7 @@ export const getRandomHomeVideoOptimized = async (req: Request, res: Response,
         url: videoUrl,
         key: randomVideo.Key,
         size: randomVideo.Size,
-        preloadHint: `<span class="math-inline">\{process\.env\.API\_URL\}/videos/preload/</span>{encodeURIComponent(randomVideo.Key)}`
+        preloadHint: `${process.env.API_URL}/videos/preload/${encodeURIComponent(randomVideo.Key)}`
       }
     });
   } catch (error) {
