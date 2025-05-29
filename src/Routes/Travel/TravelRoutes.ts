@@ -19,7 +19,9 @@ import {
   updateTravelPackageImage,
   uploadVideosToRandomTravelVideos,
   getRandomHomeVideoOptimized,
-  streamVideo
+  streamVideo,
+  updateHomeVideos,
+  fetchAllHomeVideos
 } from "../../Controllers/Travel/TravelController.js";
 import checkJwt from "../../Middleware/checkJwt.js";
 import { UserCategory } from "../../DataTypes/enums/IUserEnums.js";
@@ -831,5 +833,146 @@ router.get("/Travel/home/randomVideo", getRandomHomeVideoOptimized);
  *         description: Internal server error
  */
 router.get("/Travel/streamVideo/:key", streamVideo);
+
+
+/**
+ * @swagger
+ * /Travel/home/videos:
+ * patch:
+ * summary: Update home videos - deletes old videos and uploads new ones to AWS S3
+ * tags: [Travel]
+ * security:
+ * - bearerAuth: []
+ * requestBody:
+ * required: true
+ * content:
+ * application/json:
+ * schema:
+ * type: object
+ * properties:
+ * videosToDelete:
+ * type: array
+ * items:
+ * type: string
+ * description: Array of S3 keys of videos to delete.
+ * example: ["homeVideos/1678886400000_0.mp4"]
+ * newVideos:
+ * type: array
+ * items:
+ * type: object
+ * properties:
+ * base64:
+ * type: string
+ * description: Base64 encoded video data.
+ * example: "data:video/mp4;base64,AAAAGGZ0eXBtcDQy..."
+ * fileName:
+ * type: string
+ * description: Original file name with extension.
+ * example: "my_new_video.mp4"
+ * description: Array of new videos to upload (base64 encoded).
+ * responses:
+ * 200:
+ * description: Home videos updated successfully
+ * content:
+ * application/json:
+ * schema:
+ * type: object
+ * properties:
+ * data:
+ * type: object
+ * properties:
+ * deletedCount:
+ * type: integer
+ * description: Number of videos deleted.
+ * uploadedCount:
+ * type: integer
+ * description: Number of new videos uploaded.
+ * allVideos:
+ * type: array
+ * items:
+ * type: object
+ * properties:
+ * key:
+ * type: string
+ * url:
+ * type: string
+ * size:
+ * type: integer
+ * lastModified:
+ * type: string
+ * format: date-time
+ * description: Array of all current home videos after the update.
+ * uploadedVideos:
+ * type: array
+ * items:
+ * type: object
+ * properties:
+ * url:
+ * type: string
+ * key:
+ * type: string
+ * description: Array of URLs and keys for newly uploaded videos.
+ * message:
+ * type: string
+ * example: "Home videos updated successfully"
+ * 400:
+ * description: Bad request - invalid input
+ * 401:
+ * description: Unauthorized - authentication required
+ * 500:
+ * description: Internal server error
+ */
+router.patch("/Travel/home/videos",
+  checkJwt([UserCategory.SUPER_ADMIN]),
+  updateHomeVideos
+);
+
+
+/**
+ * @swagger
+ * /Travel/home/videos:
+ * get:
+ * summary: Fetch all home videos from S3 bucket
+ * tags: [Travel]
+ * responses:
+ * 200:
+ * description: List of all home videos
+ * content:
+ * application/json:
+ * schema:
+ * type: object
+ * properties:
+ * data:
+ * type: array
+ * items:
+ * type: object
+ * properties:
+ * key:
+ * type: string
+ * description: S3 object key.
+ * url:
+ * type: string
+ * description: URL of the video.
+ * size:
+ * type: integer
+ * description: File size in bytes.
+ * lastModified:
+ * type: string
+ * format: date-time
+ * description: When the video was last modified.
+ * etag:
+ * type: string
+ * description: ETag of the video object.
+ * message:
+ * type: string
+ * example: "Home videos fetched successfully"
+ * 404:
+ * description: No home videos found
+ * 500:
+ * description: Internal server error
+ */
+router.get("/Travel/home/videos",
+  fetchAllHomeVideos
+);
 
 export default router;

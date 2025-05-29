@@ -1363,6 +1363,266 @@ export const getRandomHomeVideoOptimized = async (req: Request, res: Response, n
   }
 };
 
+
+
+/**
+ * Update home videos - deletes old videos and uploads new ones to AWS S3
+ */
+export const updateHomeVideos = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const childLogger = (req as any).childLogger as winston.Logger;
+  const { videosToDelete = [], newVideos = [] } = req.body;
+
+  try {
+    logWithMessageAndStep(
+      childLogger,
+      "Step 1",
+      "Updating home videos",
+      "updateHomeVideos",
+      `Videos to delete: ${videosToDelete.length}, New videos: ${newVideos.length}`,
+      "info"
+    );
+
+    // Validate input
+    if (!Array.isArray(videosToDelete) || !Array.isArray(newVideos)) {
+      return res.status(400).json({
+        error: "videosToDelete and newVideos must be arrays"
+      });
+    }
+
+    // Step 1: Delete old videos from S3
+    if (videosToDelete.length > 0) {
+      logWithMessageAndStep(
+        childLogger,
+        "Step 2",
+        "Deleting old videos from S3",
+        "updateHomeVideos",
+        `Deleting ${videosToDelete.length} videos`,
+        "info"
+      );
+
+      const deleteParams = {
+        Bucket: process.env.S3_BUCKET_NAME!,
+        Delete: {
+          Objects: videosToDelete.map((key: string) => ({ Key: key })),
+          Quiet: false
+        }
+      };
+
+      try {
+        await s3.deleteObjects(deleteParams).promise();
+        logWithMessageAndStep(
+          childLogger,
+          "Step 3",
+          "Successfully deleted old videos from S3",
+          "updateHomeVideos",
+          `Deleted ${videosToDelete.length} videos`,
+          "info"
+        );
+      } catch (deleteError) {
+        logWithMessageAndStep(
+          childLogger,
+          "Error Step",
+          "Error deleting videos from S3",
+          "updateHomeVideos",
+          JSON.stringify(deleteError),
+          "error"
+        );
+        // Continue even if deletion fails to attempt uploading new videos
+      }
+    }
+
+    // Step 2: Upload new videos to S3
+    const uploadedVideos: { url: string; key: string }[] = [];
+    if (newVideos.length > 0) {
+      logWithMessageAndStep(
+        childLogger,
+        "Step 4",
+        "Uploading new videos to S3",
+        "updateHomeVideos",
+        `Uploading ${newVideos.length} videos`,
+        "info"
+      );
+
+      await Promise.all(
+        newVideos.map(async (video: { base64: string; fileName: string }, index: number) => {
+          try {
+            if (!video.base64 || !video.fileName) {
+              throw new Error(`Video at index ${index} is missing base64 data or fileName`);
+            }
+
+            const fileExtension = video.fileName.split('.').pop() || 'mp4';
+            const contentType = `video/${fileExtension === 'mov' ? 'quicktime' : fileExtension === 'avi' ? 'x-msvideo' : fileExtension}`;
+            const key = `homeVideos/${Date.now()}_${index}.${fileExtension}`;
+
+            const url = await uploadFileToS3(
+              video.base64,
+              key,
+              contentType
+            );
+
+            if (url) {
+              uploadedVideos.push({ url, key });
+            }
+          } catch (uploadError) {
+            logWithMessageAndStep(
+              childLogger,
+              "Error Step",
+              `Error uploading video at index ${index}`,
+              "updateHomeVideos",
+              JSON.stringify(uploadError),
+              "error"
+            );
+          }
+        })
+      );
+
+      logWithMessageAndStep(
+        childLogger,
+        "Step 5",
+        "Finished uploading new videos to S3",
+        "updateHomeVideos",
+        `Uploaded ${uploadedVideos.length} of ${newVideos.length} videos`,
+        uploadedVideos.length === newVideos.length ? "info" : "warn"
+      );
+    }
+
+    // Step 3: Get updated list of all home videos
+    logWithMessageAndStep(
+      childLogger,
+      "Step 6",
+      "Fetching updated list of home videos",
+      "updateHomeVideos",
+      "",
+      "info"
+    );
+
+    const data = await s3.listObjectsV2({
+      Bucket: process.env.S3_BUCKET_NAME!,
+      Prefix: 'homeVideos/',
+      MaxKeys: 1000
+    }).promise();
+
+    const allVideos = data.Contents?.map(obj => ({
+      key: obj.Key,
+      url: `https://${process.env.S3_BUCKET_NAME}.s3.${s3.config.region}.amazonaws.com/${obj.Key}`,
+      size: obj.Size,
+      lastModified: obj.LastModified
+    })) || [];
+
+    logWithMessageAndStep(
+      childLogger,
+      "Step 7",
+      "Successfully updated home videos",
+      "updateHomeVideos",
+      `Total videos now: ${allVideos.length}`,
+      "info"
+    );
+
+    res.status(200).json({
+      data: {
+        deletedCount: videosToDelete.length,
+        uploadedCount: uploadedVideos.length,
+        allVideos,
+        uploadedVideos
+      },
+      message: "Home videos updated successfully"
+    });
+  } catch (error) {
+    logWithMessageAndStep(
+      childLogger,
+      "Error Step",
+      "Error updating home videos",
+      "updateHomeVideos",
+      JSON.stringify(error),
+      "error"
+    );
+    next(error);
+  }
+};
+
+/**
+ * Fetch all home videos from S3 bucket
+ */
+export const fetchAllHomeVideos = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const childLogger = (req as any).childLogger as winston.Logger;
+
+  try {
+    logWithMessageAndStep(
+      childLogger,
+      "Step 1",
+      "Fetching all home videos from S3",
+      "fetchAllHomeVideos",
+      "",
+      "info"
+    );
+
+    // List all objects in the homeVideos folder
+    const data = await s3.listObjectsV2({
+      Bucket: process.env.S3_BUCKET_NAME!,
+      Prefix: 'homeVideos/',
+      MaxKeys: 1000 // Adjust based on expected maximum number of videos
+    }).promise();
+
+    if (!data.Contents || data.Contents.length === 0) {
+      logWithMessageAndStep(
+        childLogger,
+        "Step 2",
+        "No home videos found in S3",
+        "fetchAllHomeVideos",
+        "",
+        "warn"
+      );
+      return res.status(200).json({
+        data: [],
+        message: "No home videos found"
+      });
+    }
+
+    // Filter and format the video data
+    const videos = data.Contents
+      .filter(obj => obj.Key && obj.Key.match(/\.(mp4|mov|avi|webm)$/i))
+      .map(obj => ({
+        key: obj.Key,
+        url: `https://${process.env.S3_BUCKET_NAME}.s3.${s3.config.region}.amazonaws.com/${obj.Key}`,
+        size: obj.Size,
+        lastModified: obj.LastModified,
+        etag: obj.ETag
+      }));
+
+    logWithMessageAndStep(
+      childLogger,
+      "Step 2",
+      "Successfully fetched home videos",
+      "fetchAllHomeVideos",
+      `Found ${videos.length} videos`,
+      "info"
+    );
+
+    res.status(200).json({
+      data: videos,
+      message: "Home videos fetched successfully"
+    });
+  } catch (error) {
+    logWithMessageAndStep(
+      childLogger,
+      "Error Step",
+      "Error fetching home videos",
+      "fetchAllHomeVideos",
+      JSON.stringify(error),
+      "error"
+    );
+    next(error);
+  }
+};
+
 /**
  * Pre-load endpoint for warming up the cache
  */
