@@ -1375,6 +1375,7 @@ export const updateHomeVideos = async (
 ) => {
   const childLogger = (req as any).childLogger as winston.Logger;
   const { videosToDelete = [], newVideos = [] } = req.body;
+      console.log(videosToDelete)
 
   try {
     logWithMessageAndStep(
@@ -1403,7 +1404,6 @@ export const updateHomeVideos = async (
         `Deleting ${videosToDelete.length} videos`,
         "info"
       );
-
       const deleteParams = {
         Bucket: process.env.S3_BUCKET_NAME!,
         Delete: {
