@@ -528,7 +528,8 @@ export const getAllUsers = async (
                 category: true,
                 accountStatus: true,
                 createdAt: true,
-                updatedAt: true
+                updatedAt: true,
+                permissions:true
             },
             orderBy: {
                 createdAt: 'desc'
