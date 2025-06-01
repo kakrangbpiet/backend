@@ -177,7 +177,7 @@ router.patch(
 
 /**
  * @swagger
- * /users/{id}/permissions:
+ * /users/permissions/{id}:
  * get:
  * summary: Get a user's assigned permissions
  * tags: [Roles & Permissions]
@@ -206,7 +206,7 @@ router.patch(
  * description: Internal server error.
  */
 router.get(
-    "/users/:id/permissions",
+    "/users/permissions/:id",
     checkJwt([UserCategory.SUPER_ADMIN, UserCategory.SAMSARA_MARKETING, UserCategory.SAMSARA_OPERATION, UserCategory.User]), // Adjust who can view permissions (e.g., any authenticated user for their own, or admins for others)
     getPermissionsForUser
 );

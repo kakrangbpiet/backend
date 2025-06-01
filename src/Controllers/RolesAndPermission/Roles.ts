@@ -3,7 +3,7 @@ import { Response, NextFunction } from "express";
 import winston from "winston";
 import { logWithMessageAndStep } from "../../Utils/Logger/logger.js";
 import { prisma } from "../../Utils/db/client.js";
-import { ErrorEnum, DbError } from "../../DataTypes/enums/Error.js";
+import {  DbError } from "../../DataTypes/enums/Error.js";
 import { RequestWithUser } from "../../Middleware/checkJwt.js"; // Assuming this exists
 import { UserCategory } from "../../DataTypes/enums/IUserEnums.js";
 import { Prisma } from "@prisma/client";
